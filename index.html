@@ -1,229 +1,253 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HHB Dashboard — Яндекс Директ + Метрика</title>
+<title>HHB Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:      #0d0f18;
-  --bg2:     #161929;
-  --bg3:     #1e2235;
-  --bg4:     #252840;
-  --border:  #2a2f4a;
-  --text:    #e2e5f0;
-  --text2:   #7c82a3;
-  --text3:   #545878;
-  --accent:  #6366f1;
-  --accent2: #818cf8;
-  --green:   #10b981;
-  --red:     #ef4444;
-  --yellow:  #f59e0b;
-  --radius:  14px;
-  --shadow:  0 4px 24px rgba(0,0,0,0.5);
+/* ── Темы ── */
+:root[data-theme="dark"] {
+  --bg:     #0d0f18; --bg2: #161929; --bg3: #1e2235; --bg4: #252840;
+  --border: #2a2f4a; --text: #e2e5f0; --text2: #7c82a3; --text3: #454869;
+  --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --chart-grid: #1e2235;
 }
+:root[data-theme="light"] {
+  --bg:     #f0f2f8; --bg2: #ffffff; --bg3: #f5f6fc; --bg4: #eaecf7;
+  --border: #dde1f0; --text: #1a1d2e; --text2: #6b6f8a; --text3: #a0a4bc;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  --chart-grid: #eaecf7;
+}
+:root {
+  --accent: #6366f1; --accent2: #818cf8;
+  --green:  #10b981; --red: #ef4444; --yellow: #f59e0b;
+  --radius: 14px;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-       background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+       background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px;
+       transition: background .2s, color .2s; }
 
 /* ── Header ── */
 .header {
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  padding: 0 28px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  height: 58px;
-  position: sticky; top: 0; z-index: 200;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; align-items: center; gap: 12px;
+  height: 56px; position: sticky; top: 0; z-index: 200; flex-wrap: wrap;
 }
-.logo { font-weight: 800; font-size: 17px; letter-spacing: -0.5px;
-        background: linear-gradient(135deg, #818cf8, #6366f1); -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent; white-space: nowrap; }
-.sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
-.account-select {
+.logo { font-weight: 800; font-size: 16px; letter-spacing: -.5px; white-space: nowrap;
+        background: linear-gradient(135deg,#818cf8,#6366f1);
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.sep { width:1px; height:20px; background:var(--border); flex-shrink:0; }
+
+/* Селектор аккаунта */
+.ctrl-select {
   background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-  border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer;
-  min-width: 200px; outline: none; transition: border-color .2s;
+  border-radius: 8px; padding: 5px 10px; font-size: 13px; cursor: pointer;
+  outline: none; transition: border-color .2s; min-width: 180px;
 }
-.account-select:focus { border-color: var(--accent); }
-.header-period { font-size: 12px; color: var(--text2); }
-.header-right { margin-left: auto; font-size: 11px; color: var(--text3); }
+.ctrl-select:focus { border-color: var(--accent); }
+
+/* Кнопки периода */
+.period-btns { display: flex; gap: 4px; }
+.period-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  border-radius: 7px; padding: 5px 11px; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.period-btn:hover  { border-color: var(--accent); color: var(--text); }
+.period-btn.active { background: var(--accent); border-color: var(--accent);
+                     color: #fff; font-weight: 600; }
+
+/* Кнопки сравнения */
+.compare-btns { display: flex; gap: 4px; }
+.compare-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  border-radius: 7px; padding: 5px 11px; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .15s;
+}
+.compare-btn:hover  { border-color: var(--accent2); color: var(--text); }
+.compare-btn.active { background: var(--bg4); border-color: var(--accent2); color: var(--text); }
+
+/* Тема */
+.theme-btn {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+  width: 34px; height: 30px; cursor: pointer; font-size: 15px;
+  display: flex; align-items: center; justify-content: center; margin-left: auto;
+  transition: background .15s;
+}
+.theme-btn:hover { background: var(--bg4); }
+
+/* Период label */
+.period-label { font-size: 11px; color: var(--text3); white-space: nowrap; }
 
 /* ── Main ── */
-.main { max-width: 1440px; margin: 0 auto; padding: 24px 28px; }
-.section-label {
-  font-size: 11px; font-weight: 600; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
-}
+.main { max-width: 1440px; margin: 0 auto; padding: 20px 24px; }
+.sec-label { font-size: 11px; font-weight: 600; color: var(--text3);
+             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
 
 /* ── KPI Grid ── */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-  gap: 14px; margin-bottom: 24px;
-}
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px,1fr));
+            gap: 12px; margin-bottom: 20px; }
 .kpi-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px 20px;
-  box-shadow: var(--shadow); position: relative; overflow: hidden;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px; box-shadow: var(--shadow); position: relative; overflow: hidden;
   transition: border-color .2s, transform .15s;
 }
-.kpi-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-.kpi-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  opacity: 0; transition: opacity .2s;
-}
-.kpi-card:hover::before { opacity: 1; }
-.kpi-label { font-size: 11px; color: var(--text2); text-transform: uppercase;
-             letter-spacing: 0.5px; margin-bottom: 10px; }
-.kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 8px;
-             font-variant-numeric: tabular-nums; }
-.kpi-change { font-size: 12px; display: flex; align-items: center; gap: 5px; }
-.pos { color: var(--green); } .neg { color: var(--red); } .neu { color: var(--text3); }
-.kpi-vs { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.kpi-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.kpi-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px;
+                   background:linear-gradient(90deg,var(--accent),var(--accent2));
+                   opacity:0; transition:opacity .2s; }
+.kpi-card:hover::after { opacity:1; }
+.kpi-label { font-size:11px; color:var(--text2); text-transform:uppercase;
+             letter-spacing:.5px; margin-bottom:8px; }
+.kpi-value { font-size:24px; font-weight:700; line-height:1; margin-bottom:6px;
+             font-variant-numeric:tabular-nums; }
+.kpi-chg   { font-size:12px; }
+.kpi-vs    { font-size:10px; color:var(--text3); margin-top:2px; }
+.pos { color:var(--green); } .neg { color:var(--red); } .neu { color:var(--text3); }
 
-/* ── Charts Row ── */
-.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
-@media (max-width: 1000px) { .charts-row { grid-template-columns: 1fr; } }
-
-.chart-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
-}
-.chart-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 16px; }
-.chart-wrap { position: relative; height: 220px; }
+/* ── Charts ── */
+.charts-row { display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:20px; }
+@media(max-width:1000px){ .charts-row{ grid-template-columns:1fr; } }
+.chart-card { background:var(--bg2); border:1px solid var(--border);
+              border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
+.chart-title { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:14px; }
+.chart-wrap  { position:relative; height:210px; }
 
 /* ── Funnel ── */
-.funnel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-@media (max-width: 900px) { .funnel-row { grid-template-columns: 1fr; } }
+.funnel-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+@media(max-width:900px){ .funnel-row{ grid-template-columns:1fr; } }
+.funnel-card { background:var(--bg2); border:1px solid var(--border);
+               border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
+.funnel-title { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:16px; }
+.funnel-step  { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.funnel-name  { font-size:12px; color:var(--text2); width:95px; text-align:right; flex-shrink:0; }
+.funnel-track { flex:1; height:28px; background:var(--bg3); border-radius:6px; overflow:hidden; }
+.funnel-bar   { height:100%; border-radius:6px; display:flex; align-items:center;
+                padding:0 9px; font-size:11px; font-weight:700; color:rgba(255,255,255,.9);
+                transition:width .8s cubic-bezier(.4,0,.2,1); }
+.funnel-val   { font-size:12px; font-weight:600; width:70px; font-variant-numeric:tabular-nums; }
+.funnel-conv  { font-size:10px; color:var(--text3); }
 
-.funnel-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+/* ── Campaign filter tabs ── */
+.camp-filter { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+.camp-tab {
+  background:var(--bg3); border:1px solid var(--border); color:var(--text2);
+  border-radius:7px; padding:5px 13px; font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .15s;
 }
-.funnel-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 18px; }
-.funnel-step { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.funnel-name { font-size: 12px; color: var(--text2); width: 100px; text-align: right; flex-shrink: 0; }
-.funnel-track { flex: 1; height: 30px; background: var(--bg3); border-radius: 7px; overflow: hidden; }
-.funnel-bar {
-  height: 100%; border-radius: 7px; display: flex; align-items: center;
-  padding: 0 10px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.9);
-  min-width: 30px; transition: width 0.8s cubic-bezier(.4,0,.2,1);
-}
-.funnel-val { font-size: 13px; font-weight: 600; width: 80px; font-variant-numeric: tabular-nums; }
-.funnel-conv { font-size: 10px; color: var(--text3); }
+.camp-tab:hover  { border-color:var(--accent); color:var(--text); }
+.camp-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
 
-/* ── Campaigns Table ── */
-.table-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); margin-bottom: 24px;
-}
-.table-header-row {
-  padding: 16px 20px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.table-title { font-size: 13px; font-weight: 600; color: var(--text2); }
-.table-hint { font-size: 11px; color: var(--text3); }
-table { width: 100%; border-collapse: collapse; }
-thead th {
-  padding: 10px 16px; text-align: left; font-size: 11px; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border);
-  font-weight: 500; white-space: nowrap;
-}
-tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-tbody tr:last-child td { border-bottom: none; }
-tbody tr { cursor: pointer; transition: background .15s; }
-tbody tr:hover td { background: var(--bg3); }
-.td-name { font-weight: 500; }
-.td-sub { font-size: 11px; color: var(--text3); margin-top: 3px; display: flex; gap: 6px; }
-.tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
-.tag-search { background: #1e3060; color: #93c5fd; }
-.tag-rsya   { background: #14402e; color: #6ee7b7; }
-.num { font-variant-numeric: tabular-nums; }
-.chg { font-size: 11px; margin-top: 2px; }
-.trend { font-size: 18px; }
-
-/* ── Sparkline column ── */
-.spark-wrap { width: 80px; height: 32px; }
+/* ── Table ── */
+.table-card { background:var(--bg2); border:1px solid var(--border);
+              border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
+              margin-bottom:20px; }
+.table-head-row { padding:14px 18px; border-bottom:1px solid var(--border);
+                  display:flex; align-items:center; justify-content:space-between; }
+.table-title { font-size:13px; font-weight:600; }
+.table-hint  { font-size:11px; color:var(--text3); }
+table { width:100%; border-collapse:collapse; }
+thead th { padding:9px 14px; text-align:left; font-size:11px; color:var(--text3);
+           text-transform:uppercase; letter-spacing:.4px;
+           border-bottom:1px solid var(--border); font-weight:500; white-space:nowrap; }
+tbody td { padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr { cursor:pointer; transition:background .1s; }
+tbody tr:hover td { background:var(--bg3); }
+.td-name { font-weight:500; max-width:260px; }
+.td-sub  { font-size:11px; color:var(--text3); margin-top:3px; display:flex; gap:5px; align-items:center; }
+.tag { display:inline-block; font-size:10px; padding:2px 7px; border-radius:4px;
+       font-weight:600; text-transform:uppercase; flex-shrink:0; }
+.tag-search { background:#1e3060; color:#93c5fd; }
+.tag-rsya   { background:#14402e; color:#6ee7b7; }
+.tag-other  { background:#3a2e10; color:#fbbf24; }
+.num { font-variant-numeric:tabular-nums; }
+.chg { font-size:11px; margin-top:2px; }
+.trend-up { color:var(--green); } .trend-dn { color:var(--red); } .trend-fl { color:var(--text3); }
 
 /* ── Modal ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: 18px;
-  width: 640px; max-width: 95vw; max-height: 85vh; overflow-y: auto;
-  padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-}
-.modal-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-.modal-title { font-size: 16px; font-weight: 700; }
-.modal-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
-.modal-close { background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
-               width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
-               display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.modal-close:hover { background: var(--bg4); }
-.modal-kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-.modal-kpi-item { background: var(--bg3); border-radius: 10px; padding: 14px; }
-.modal-kpi-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
-.modal-kpi-val { font-size: 20px; font-weight: 700; }
-.modal-chart-wrap { height: 160px; margin-bottom: 8px; }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
+                 z-index:500; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--bg2); border:1px solid var(--border); border-radius:18px;
+         width:660px; max-width:95vw; max-height:88vh; overflow-y:auto;
+         padding:26px; box-shadow:0 20px 60px rgba(0,0,0,.7); }
+.modal-top  { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; }
+.modal-title{ font-size:15px; font-weight:700; }
+.modal-sub  { font-size:12px; color:var(--text2); margin-top:4px; }
+.modal-x    { background:var(--bg3); border:1px solid var(--border); color:var(--text2);
+              width:30px; height:30px; border-radius:7px; cursor:pointer; font-size:15px;
+              display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.modal-x:hover { background:var(--bg4); }
+.modal-kpi  { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
+.modal-kpi-item { background:var(--bg3); border-radius:10px; padding:13px; }
+.modal-kpi-lbl  { font-size:11px; color:var(--text3); margin-bottom:5px; }
+.modal-kpi-val  { font-size:19px; font-weight:700; }
+.modal-chart    { height:150px; }
 
-/* ── No data ── */
-.no-data { padding: 60px; text-align: center; color: var(--text3); font-size: 14px; }
-
-/* ── Footer ── */
-.footer { text-align: center; padding: 28px; color: var(--text3); font-size: 11px;
-          border-top: 1px solid var(--border); margin-top: 8px; }
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* ── No data / footer ── */
+.no-data { padding:60px; text-align:center; color:var(--text3); font-size:14px; }
+.footer  { text-align:center; padding:24px; color:var(--text3); font-size:11px;
+           border-top:1px solid var(--border); margin-top:8px; }
+::-webkit-scrollbar       { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg2); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 </style>
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <div class="header">
   <div class="logo">HHB Dashboard</div>
   <div class="sep"></div>
-  <select class="account-select" id="accountSelect" onchange="switchAccount(this.value)">
-    <option>Загрузка...</option>
-  </select>
-  <div class="header-period" id="headerPeriod"></div>
-  <div class="header-right" id="headerMeta"></div>
+
+  <select class="ctrl-select" id="accountSelect" onchange="onAccountChange(this.value)"></select>
+  <div class="sep"></div>
+
+  <!-- Период -->
+  <div class="period-btns" id="periodBtns">
+    <button class="period-btn" data-days="7"     onclick="setPeriod(7)">7д</button>
+    <button class="period-btn active" data-days="30" onclick="setPeriod(30)">30д</button>
+    <button class="period-btn" data-days="month" onclick="setPeriod('month')">Месяц</button>
+    <button class="period-btn" data-days="week"  onclick="setPeriod('week')">Неделя</button>
+  </div>
+  <div class="sep"></div>
+
+  <!-- Сравнение -->
+  <div class="compare-btns">
+    <button class="compare-btn active" onclick="setCompare('prev')" id="cmp-prev">Пред. период</button>
+    <button class="compare-btn"        onclick="setCompare('none')" id="cmp-none">Без сравнения</button>
+  </div>
+
+  <div class="period-label" id="periodLabel"></div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Переключить тему">🌙</button>
 </div>
 
-<div class="main" id="mainContent">
-  <div class="no-data">Загрузка данных...</div>
-</div>
-
+<!-- ── MAIN ── -->
+<div class="main" id="mainContent"><div class="no-data">Загрузка...</div></div>
 <div class="footer" id="footer"></div>
 
-<!-- Modal -->
+<!-- ── MODAL ── -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
-    <div class="modal-head">
-      <div>
-        <div class="modal-title" id="modalTitle"></div>
-        <div class="modal-sub" id="modalSub"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+  <div class="modal">
+    <div class="modal-top">
+      <div><div class="modal-title" id="mTitle"></div><div class="modal-sub" id="mSub"></div></div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-kpi" id="modalKpi"></div>
-    <div class="chart-title" style="margin-bottom:12px">Динамика кликов</div>
-    <div class="modal-chart-wrap"><canvas id="modalChart"></canvas></div>
+    <div class="modal-kpi" id="mKpi"></div>
+    <div class="chart-title" style="margin-bottom:10px">Клики по дням</div>
+    <div class="modal-chart"><canvas id="mChart"></canvas></div>
   </div>
 </div>
 
 <script>
+// ─── Данные ───────────────────────────────────────────────────────────────────
 window.__DASHBOARD_DATA__ = {
   "meta": {
-    "generated_at": "2026-04-14T19:32:05.765878Z",
+    "generated_at": "2026-04-14T19:36:07.655387Z",
     "date_from": "2026-03-15",
     "date_to": "2026-04-13",
     "tool": "hhb-dashboard",
@@ -237,7 +261,7 @@ window.__DASHBOARD_DATA__ = {
   "accounts": {
     "account_1": {
       "meta": {
-        "generated_at": "2026-04-14T19:32:00.097564Z",
+        "generated_at": "2026-04-14T19:36:03.354804Z",
         "date_from": "2026-03-15",
         "date_to": "2026-04-13",
         "prev_date_from": "2026-02-13",
@@ -253,33 +277,31 @@ window.__DASHBOARD_DATA__ = {
       },
       "direct": {
         "current": {
-          "daily": [],
           "totals": {
             "impressions": 0,
             "clicks": 0,
             "cost_rub": 0.0,
-            "ctr": 0,
-            "cpc": 0
+            "ctr": 0.0,
+            "cpc": 0.0
           }
         },
         "prev": {
-          "daily": [],
           "totals": {
             "impressions": 0,
             "clicks": 0,
             "cost_rub": 0.0,
-            "ctr": 0,
-            "cpc": 0
+            "ctr": 0.0,
+            "cpc": 0.0
           }
         },
-        "campaign_summaries": {},
         "change": {
           "impressions_pct": 0,
           "clicks_pct": 0,
           "cost_pct": 0,
-          "ctr_pp": 0,
+          "ctr_pp": 0.0,
           "cpc_pct": 0
-        }
+        },
+        "campaign_summaries": {}
       },
       "metrica": {
         "current": {
@@ -910,18 +932,15 @@ window.__DASHBOARD_DATA__ = {
         },
         "goals": {
           "available": true,
-          "goals": 2,
           "total_leads": 2117,
           "data": [
             {
               "goal_id": "320278892",
-              "reaches": 221,
-              "conv_rate": 0.36
+              "reaches": 221
             },
             {
               "goal_id": "306955254",
-              "reaches": 1896,
-              "conv_rate": 2.68
+              "reaches": 1896
             }
           ]
         }
@@ -929,7 +948,7 @@ window.__DASHBOARD_DATA__ = {
     },
     "account_2": {
       "meta": {
-        "generated_at": "2026-04-14T19:32:05.765865Z",
+        "generated_at": "2026-04-14T19:36:07.655367Z",
         "date_from": "2026-03-15",
         "date_to": "2026-04-13",
         "prev_date_from": "2026-02-13",
@@ -944,33 +963,31 @@ window.__DASHBOARD_DATA__ = {
       },
       "direct": {
         "current": {
-          "daily": [],
           "totals": {
             "impressions": 0,
             "clicks": 0,
             "cost_rub": 0.0,
-            "ctr": 0,
-            "cpc": 0
+            "ctr": 0.0,
+            "cpc": 0.0
           }
         },
         "prev": {
-          "daily": [],
           "totals": {
             "impressions": 0,
             "clicks": 0,
             "cost_rub": 0.0,
-            "ctr": 0,
-            "cpc": 0
+            "ctr": 0.0,
+            "cpc": 0.0
           }
         },
-        "campaign_summaries": {},
         "change": {
           "impressions_pct": 0,
           "clicks_pct": 0,
           "cost_pct": 0,
-          "ctr_pp": 0,
+          "ctr_pp": 0.0,
           "cpc_pct": 0
-        }
+        },
+        "campaign_summaries": {}
       },
       "metrica": {
         "current": {
@@ -1601,13 +1618,11 @@ window.__DASHBOARD_DATA__ = {
         },
         "goals": {
           "available": true,
-          "goals": 1,
           "total_leads": 2,
           "data": [
             {
               "goal_id": "545463626",
-              "reaches": 2,
-              "conv_rate": 0.02
+              "reaches": 2
             }
           ]
         }
@@ -1615,114 +1630,265 @@ window.__DASHBOARD_DATA__ = {
     }
   }
 };
-
 const D = window.__DASHBOARD_DATA__;
-let charts = {};
-let modalChart = null;
 
-// ── Utils ──
-const fmt = (n, d=0) => n == null || isNaN(+n) ? '—' :
-  (+n).toLocaleString('ru-RU', {minimumFractionDigits:d, maximumFractionDigits:d});
-const fmtRub = n => n == null || isNaN(+n) ? '—' : fmt(n,0) + ' ₽';
-const fmtPct = n => n == null || isNaN(+n) ? '—' : (+n).toFixed(1) + '%';
+// ─── Состояние ────────────────────────────────────────────────────────────────
+let state = {
+  account:   D.meta.default_account_id || D.meta.account_ids?.[0] || '',
+  days:      30,         // число, 'month' или 'week'
+  compare:   'prev',     // 'prev' | 'none'
+  campType:  'all',      // 'all' | 'search' | 'rsya' | 'other'
+  theme:     'dark',
+};
 
-function chgHtml(n, suffix='%', invert=false) {
-  if (n == null || isNaN(+n) || n === 0) return '<span class="neu">—</span>';
-  const pos = invert ? n < 0 : n > 0;
-  const cls = pos ? 'pos' : 'neg';
-  const arrow = n > 0 ? '↑' : '↓';
-  return `<span class="${cls}">${arrow}${Math.abs(n).toFixed(1)}${suffix}</span>`;
+// ─── Utils ────────────────────────────────────────────────────────────────────
+const fmt    = (n,d=0)  => n==null||isNaN(+n) ? '—' :
+  (+n).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtRub = n => n==null||isNaN(+n) ? '—' : fmt(n,0)+' ₽';
+const fmtPct = n => n==null||isNaN(+n) ? '—' : (+n).toFixed(1)+'%';
+
+function chgHtml(n, suf='%', inv=false) {
+  if (n==null||isNaN(+n)||+n===0) return '<span class="neu">—</span>';
+  const isPos = inv ? n<0 : n>0;
+  const cls = isPos ? 'pos' : 'neg';
+  return `<span class="${cls}">${n>0?'↑':'↓'}${Math.abs(n).toFixed(1)}${suf}</span>`;
 }
 
-// ── Chart defaults ──
-Chart.defaults.color = '#7c82a3';
-Chart.defaults.borderColor = '#2a2f4a';
-Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif";
-Chart.defaults.font.size = 11;
+// ─── Вычисление дат из состояния ─────────────────────────────────────────────
+function getDates() {
+  // Берём данные из D.accounts[state.account].meta
+  const accMeta = D.accounts[state.account]?.meta || {};
+  const genDate = accMeta.date_to ? new Date(accMeta.date_to) : new Date();
+  genDate.setHours(0,0,0,0);
 
-function destroyCharts() {
-  Object.values(charts).forEach(c => c && c.destroy());
-  charts = {};
+  let dateTo   = new Date(genDate);
+  let dateFrom = new Date(genDate);
+
+  if (state.days === 'month') {
+    dateFrom = new Date(genDate.getFullYear(), genDate.getMonth(), 1);
+  } else if (state.days === 'week') {
+    const day = genDate.getDay() || 7;
+    dateFrom = new Date(genDate);
+    dateFrom.setDate(genDate.getDate() - day + 1);
+  } else {
+    dateFrom.setDate(dateTo.getDate() - (+state.days - 1));
+  }
+
+  const fmt8 = d => d.toISOString().slice(0,10);
+  return { from: fmt8(dateFrom), to: fmt8(dateTo) };
 }
 
-// ── Account selector ──
+// ─── Chart helpers ────────────────────────────────────────────────────────────
+Chart.defaults.color          = getComputedStyle(document.documentElement).getPropertyValue('--text2').trim();
+Chart.defaults.borderColor    = '#2a2f4a';
+Chart.defaults.font.family    = "-apple-system,BlinkMacSystemFont,'Inter',sans-serif";
+Chart.defaults.font.size      = 11;
+
+let charts = {}, mChart = null;
+function destroyCharts() { Object.values(charts).forEach(c=>c?.destroy()); charts={}; }
+
+const GRID_COLOR = () => getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim() || '#1e2235';
+
+// ─── Фильтрация данных кампании по дате ──────────────────────────────────────
+function filterCampDaily(daily, dateFrom, dateTo) {
+  return (daily||[]).filter(r => r.date >= dateFrom && r.date <= dateTo);
+}
+
+function aggregateCamp(daily) {
+  const impr  = daily.reduce((s,r) => s + (+r.impressions||0), 0);
+  const clicks= daily.reduce((s,r) => s + (+r.clicks||0),      0);
+  const cost  = daily.reduce((s,r) => s + (+r.cost_rub||0),    0);
+  return {
+    impressions: impr, clicks, cost_rub: Math.round(cost*100)/100,
+    ctr: impr>0 ? Math.round(clicks/impr*10000)/100 : 0,
+    cpc: clicks>0 ? Math.round(cost/clicks*100)/100 : 0,
+  };
+}
+
+// ─── Контролы ────────────────────────────────────────────────────────────────
+function setPeriod(days) {
+  state.days = days;
+  document.querySelectorAll('.period-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.days == String(days));
+  });
+  render();
+}
+
+function setCompare(mode) {
+  state.compare = mode;
+  document.getElementById('cmp-prev').classList.toggle('active', mode==='prev');
+  document.getElementById('cmp-none').classList.toggle('active', mode==='none');
+  render();
+}
+
+function onAccountChange(id) { state.account = id; render(); }
+
+function setCampType(type) {
+  state.campType = type;
+  document.querySelectorAll('.camp-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === type);
+  });
+  renderCampaigns();
+}
+
+function toggleTheme() {
+  state.theme = state.theme==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  document.getElementById('themeBtn').textContent = state.theme==='dark' ? '🌙' : '☀️';
+  Chart.defaults.color = state.theme==='dark' ? '#7c82a3' : '#6b6f8a';
+  render();
+}
+
+// ─── Инициализация селектора аккаунтов ────────────────────────────────────────
 function initSelector() {
   const sel = document.getElementById('accountSelect');
   sel.innerHTML = '';
-  (D.meta.account_ids || []).forEach(id => {
+  (D.meta.account_ids||[]).forEach(id => {
     const name = D.accounts[id]?.meta?.project_name || id;
-    sel.appendChild(Object.assign(document.createElement('option'), {value: id, textContent: name}));
+    sel.appendChild(Object.assign(document.createElement('option'),{value:id,textContent:name}));
   });
-  sel.value = D.meta.default_account_id || D.meta.account_ids?.[0];
+  sel.value = state.account;
 }
 
-function switchAccount(id) { renderDashboard(id); }
+// ─── Основной рендер ──────────────────────────────────────────────────────────
+let _campData = null; // кешируем данные кампаний для фильтра
 
-// ── Main render ──
-function renderDashboard(accountId) {
+function render() {
   destroyCharts();
-  const acc = D.accounts[accountId];
-  if (!acc || acc.error) {
+  const acc = D.accounts[state.account];
+  if (!acc||acc.error) {
     document.getElementById('mainContent').innerHTML =
-      `<div class="no-data">${acc?.error || 'Нет данных'}</div>`;
+      `<div class="no-data">${acc?.error||'Нет данных'}</div>`;
     return;
   }
 
-  const meta  = acc.meta || {};
-  const dir   = acc.direct || {};
-  const met   = acc.metrica || {};
-  const ct    = dir.current?.totals || {};
-  const pt    = dir.prev?.totals || {};
-  const mt    = met.current?.totals || {};
-  const mpt   = met.prev?.totals || {};
-  const chg   = dir.change || {};
-  const camps = dir.campaign_summaries || {};
-  const daily = met.current?.daily || [];
+  const {from: dateFrom, to: dateTo} = getDates();
+  const accMeta = acc.meta || {};
 
-  document.getElementById('headerPeriod').textContent =
-    meta.date_from && meta.date_to ? `${meta.date_from} — ${meta.date_to}` : '';
-  document.getElementById('headerMeta').textContent =
-    meta.generated_at ? 'Обновлено: ' + new Date(meta.generated_at).toLocaleString('ru-RU') : '';
+  // Период label
+  document.getElementById('periodLabel').textContent = `${dateFrom} — ${dateTo}`;
   document.getElementById('footer').textContent =
-    `HHB Dashboard · hotheads-marketing · Яндекс Директ + Метрика · ${meta.generated_at ? new Date(meta.generated_at).toLocaleString('ru-RU') : ''}`;
+    `HHB Dashboard · hotheads-marketing · ${accMeta.generated_at ? 'Данные на: '+new Date(accMeta.generated_at).toLocaleString('ru-RU') : ''}`;
+
+  // ── Пересчёт данных Директа за выбранный период ──
+  const camps = acc.direct?.campaign_summaries || {};
+  const campEntries = Object.entries(camps);
+
+  // Агрегируем totals по отфильтрованным daily
+  let totals = {impressions:0, clicks:0, cost_rub:0};
+  let prevTotals = {impressions:0, clicks:0, cost_rub:0};
+
+  // Вычисляем prev период
+  const fromDate = new Date(dateFrom);
+  const toDate   = new Date(dateTo);
+  const diffDays = Math.round((toDate-fromDate)/(86400000)) + 1;
+  const prevTo   = new Date(fromDate); prevTo.setDate(prevTo.getDate()-1);
+  const prevFrom = new Date(prevTo);   prevFrom.setDate(prevFrom.getDate()-diffDays+1);
+  const prevFromStr = prevFrom.toISOString().slice(0,10);
+  const prevToStr   = prevTo.toISOString().slice(0,10);
+
+  // Обогащённые данные кампаний
+  _campData = campEntries.map(([id, c]) => {
+    const curDaily  = filterCampDaily(c.daily, dateFrom, dateTo);
+    const prevDaily = filterCampDaily(c.daily, prevFromStr, prevToStr);
+    const cur  = aggregateCamp(curDaily);
+    const prev = aggregateCamp(prevDaily);
+
+    totals.impressions += cur.impressions;
+    totals.clicks      += cur.clicks;
+    totals.cost_rub    += cur.cost_rub;
+    prevTotals.impressions += prev.impressions;
+    prevTotals.clicks      += prev.clicks;
+    prevTotals.cost_rub    += prev.cost_rub;
+
+    const pct = (a,b) => b>0 ? Math.round((a-b)/b*1000)/10 : 0;
+    return {
+      id, ...c,
+      cur, prev,
+      change: {
+        impressions_pct: pct(cur.impressions, prev.impressions),
+        clicks_pct:      pct(cur.clicks,      prev.clicks),
+        cost_pct:        pct(cur.cost_rub,    prev.cost_rub),
+        ctr_pp:          Math.round((cur.ctr-prev.ctr)*100)/100,
+        cpc_pct:         pct(cur.cpc,          prev.cpc),
+      },
+      filteredDaily: curDaily,
+    };
+  });
+
+  totals.ctr = totals.impressions>0 ? Math.round(totals.clicks/totals.impressions*10000)/100 : 0;
+  totals.cpc = totals.clicks>0      ? Math.round(totals.cost_rub/totals.clicks*100)/100 : 0;
+  prevTotals.ctr = prevTotals.impressions>0 ? Math.round(prevTotals.clicks/prevTotals.impressions*10000)/100 : 0;
+  prevTotals.cpc = prevTotals.clicks>0      ? Math.round(prevTotals.cost_rub/prevTotals.clicks*100)/100 : 0;
+
+  const pct = (a,b) => b>0 ? Math.round((a-b)/b*1000)/10 : 0;
+  const change = {
+    impressions_pct: pct(totals.impressions, prevTotals.impressions),
+    clicks_pct:      pct(totals.clicks,      prevTotals.clicks),
+    cost_pct:        pct(totals.cost_rub,    prevTotals.cost_rub),
+    ctr_pp:          Math.round((totals.ctr - prevTotals.ctr)*100)/100,
+    cpc_pct:         pct(totals.cpc,          prevTotals.cpc),
+  };
+
+  // Метрика — фильтруем по датам
+  const metDaily = (acc.metrica?.current?.daily||[])
+    .filter(r => r.date >= dateFrom && r.date <= dateTo);
+  const mt = metDaily.reduce((s,r) => ({
+    visits:  s.visits  + (+r.visits||0),
+    engaged: s.engaged + (+r.engaged||0),
+    leads:   s.leads   + (+r.leads||0),
+  }), {visits:0, engaged:0, leads:0});
+
+  const metPrevDaily = (acc.metrica?.current?.daily||[])
+    .filter(r => r.date >= prevFromStr && r.date <= prevToStr);
+  const mpt = metPrevDaily.reduce((s,r) => ({visits: s.visits+(+r.visits||0)}), {visits:0});
+  const visChange = mpt.visits>0 ? pct(mt.visits, mpt.visits) : null;
 
   // ── KPI ──
-  const visChange = mt.visits && mpt.visits
-    ? Math.round((mt.visits - mpt.visits) / mpt.visits * 100) : null;
+  const showComp = state.compare === 'prev';
   const kpis = [
-    {label:'Показы',          value: fmt(ct.impressions),  chg: chg.impressions_pct, suf:'%'},
-    {label:'Клики',           value: fmt(ct.clicks),       chg: chg.clicks_pct,      suf:'%'},
-    {label:'CTR',             value: fmtPct(ct.ctr),       chg: chg.ctr_pp,          suf:'pp'},
-    {label:'Расход',          value: fmtRub(ct.cost_rub),  chg: chg.cost_pct,        suf:'%'},
-    {label:'CPC',             value: fmtRub(ct.cpc),       chg: chg.cpc_pct,         suf:'%', inv:true},
-    {label:'Визиты (Метрика)',value: fmt(mt.visits),        chg: visChange,           suf:'%'},
-    {label:'Вовлечённые',     value: fmt(mt.engaged),      chg: null},
-    {label:'Лиды',            value: fmt(mt.leads) || '—', chg: null},
+    {lbl:'Показы',           val: fmt(totals.impressions), chg: change.impressions_pct, suf:'%'},
+    {lbl:'Клики',            val: fmt(totals.clicks),      chg: change.clicks_pct,      suf:'%'},
+    {lbl:'CTR',              val: fmtPct(totals.ctr),      chg: change.ctr_pp,          suf:'pp'},
+    {lbl:'Расход',           val: fmtRub(totals.cost_rub), chg: change.cost_pct,        suf:'%'},
+    {lbl:'CPC',              val: fmtRub(totals.cpc),      chg: change.cpc_pct,         suf:'%', inv:true},
+    {lbl:'Визиты (Метрика)', val: fmt(mt.visits),           chg: visChange,              suf:'%'},
+    {lbl:'Вовлечённые',      val: fmt(mt.engaged),          chg: null},
+    {lbl:'Лиды',             val: mt.leads > 0 ? fmt(mt.leads) : '—', chg: null},
   ];
 
   const kpiHtml = `
-    <div class="section-label">Ключевые показатели</div>
-    <div class="kpi-grid">
-      ${kpis.map(k => `
-        <div class="kpi-card">
-          <div class="kpi-label">${k.label}</div>
-          <div class="kpi-value">${k.value}</div>
-          <div class="kpi-change">${k.chg != null ? chgHtml(k.chg, k.suf, k.inv) : ''}</div>
-          <div class="kpi-vs">${k.chg != null ? 'vs предыдущий период' : ''}</div>
-        </div>`).join('')}
+    <div class="sec-label">Ключевые показатели</div>
+    <div class="kpi-grid">${kpis.map(k=>`
+      <div class="kpi-card">
+        <div class="kpi-label">${k.lbl}</div>
+        <div class="kpi-value">${k.val}</div>
+        <div class="kpi-chg">${showComp && k.chg!=null ? chgHtml(k.chg,k.suf,k.inv) : ''}</div>
+        <div class="kpi-vs">${showComp && k.chg!=null ? 'vs предыдущий период' : ''}</div>
+      </div>`).join('')}
     </div>`;
 
-  // ── Charts ──
-  const dateLabels = daily.map(d => d.date?.slice(5) || d.date);
-  const visitData  = daily.map(d => d.visits || 0);
-  const engData    = daily.map(d => d.engaged || 0);
+  // ── Графики ──
+  const dateLabels = metDaily.map(d=>d.date?.slice(5)||d.date);
+  const visitData  = metDaily.map(d=>d.visits||0);
+  const engData    = metDaily.map(d=>d.engaged||0);
+
+  // Суммируем расход по дням из всех кампаний
+  const costByDate = {};
+  _campData.forEach(c => {
+    c.filteredDaily.forEach(r => {
+      costByDate[r.date] = (costByDate[r.date]||0) + (+r.cost_rub||0);
+    });
+  });
+  const costLabels = Object.keys(costByDate).sort();
+  const costData   = costLabels.map(d => Math.round(costByDate[d]));
 
   const chartsHtml = `
-    <div class="section-label" style="margin-top:4px">Динамика</div>
+    <div class="sec-label" style="margin-top:4px">Динамика</div>
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title">Визиты и вовлечённые по дням</div>
-        <div class="chart-wrap"><canvas id="visitsChart"></canvas></div>
+        <div class="chart-title">Визиты и вовлечённые (Метрика)</div>
+        <div class="chart-wrap"><canvas id="visChart"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Расход по дням (Директ)</div>
@@ -1730,264 +1896,224 @@ function renderDashboard(accountId) {
       </div>
     </div>`;
 
-  // ── Funnel ──
-  const maxSite = Math.max(mt.visits || 0, 1);
-  const maxDir  = Math.max(ct.impressions || 0, 1);
-  const convRate = (a, b) => b > 0 ? (a/b*100).toFixed(1) + '%' : '—';
+  // ── Воронка ──
+  const maxSite = Math.max(mt.visits||0, 1);
+  const maxDir  = Math.max(totals.impressions||0, 1);
+  const convR   = (a,b) => b>0 ? (a/b*100).toFixed(1)+'%' : '—';
 
-  function bar(val, max, color) {
-    const w = Math.min(100, Math.round(val / max * 100));
+  function bar(val,max,color) {
+    const w = Math.min(100, Math.round(val/max*100));
     return `<div class="funnel-track">
-      <div class="funnel-bar" style="width:${w}%;background:${color}">${w > 15 ? w+'%' : ''}</div>
+      <div class="funnel-bar" style="width:${w}%;background:${color}">${w>18?w+'%':''}</div>
     </div>`;
   }
 
   const funnelHtml = `
-    <div class="section-label">Воронка</div>
+    <div class="sec-label">Воронка конверсий</div>
     <div class="funnel-row">
       <div class="funnel-card">
         <div class="funnel-title">Весь сайт (Метрика)</div>
         ${[
-          {name:'Визиты',      val: mt.visits||0,  max: maxSite, color:'#6366f1', conv: '100%'},
-          {name:'Вовлечённые', val: mt.engaged||0, max: maxSite, color:'#818cf8', conv: convRate(mt.engaged,mt.visits)},
-          {name:'Лиды',        val: mt.leads||0,   max: maxSite, color:'#10b981', conv: convRate(mt.leads,mt.visits)},
-        ].map(s => `
-          <div class="funnel-step">
-            <div class="funnel-name">${s.name}</div>
-            ${bar(s.val, s.max, s.color)}
-            <div class="funnel-val">${fmt(s.val)}<div class="funnel-conv">${s.conv}</div></div>
-          </div>`).join('')}
+          {n:'Визиты',      v:mt.visits||0,  c:'#6366f1', conv:'100%'},
+          {n:'Вовлечённые', v:mt.engaged||0, c:'#818cf8', conv:convR(mt.engaged,mt.visits)},
+          {n:'Лиды',        v:mt.leads||0,   c:'#10b981', conv:convR(mt.leads,mt.visits)},
+        ].map(s=>`<div class="funnel-step">
+          <div class="funnel-name">${s.n}</div>${bar(s.v,maxSite,s.c)}
+          <div class="funnel-val">${fmt(s.v)}<div class="funnel-conv">${s.conv}</div></div>
+        </div>`).join('')}
       </div>
       <div class="funnel-card">
         <div class="funnel-title">Яндекс Директ</div>
         ${[
-          {name:'Показы',  val: ct.impressions||0, max: maxDir, color:'#6366f1', conv:'100%'},
-          {name:'Клики',   val: ct.clicks||0,      max: maxDir, color:'#818cf8', conv: convRate(ct.clicks,ct.impressions)},
-          {name:'Визиты',  val: mt.visits||0,       max: maxDir, color:'#a5b4fc', conv: convRate(mt.visits,ct.clicks)},
-          {name:'Лиды',    val: mt.leads||0,         max: maxDir, color:'#10b981', conv: convRate(mt.leads,ct.clicks)},
-        ].map(s => `
-          <div class="funnel-step">
-            <div class="funnel-name">${s.name}</div>
-            ${bar(s.val, s.max, s.color)}
-            <div class="funnel-val">${fmt(s.val)}<div class="funnel-conv">${s.conv}</div></div>
-          </div>`).join('')}
+          {n:'Показы',  v:totals.impressions||0, c:'#6366f1', conv:'100%'},
+          {n:'Клики',   v:totals.clicks||0,      c:'#818cf8', conv:convR(totals.clicks,totals.impressions)},
+          {n:'Визиты',  v:mt.visits||0,           c:'#a5b4fc', conv:convR(mt.visits,totals.clicks)},
+          {n:'Лиды',    v:mt.leads||0,             c:'#10b981', conv:convR(mt.leads,totals.clicks)},
+        ].map(s=>`<div class="funnel-step">
+          <div class="funnel-name">${s.n}</div>${bar(s.v,maxDir,s.c)}
+          <div class="funnel-val">${fmt(s.v)}<div class="funnel-conv">${s.conv}</div></div>
+        </div>`).join('')}
       </div>
     </div>`;
 
-  // ── Campaigns table ──
-  const campList = Object.entries(camps);
-  let tableHtml = '';
-  if (campList.length === 0) {
-    tableHtml = '<div class="no-data">Нет данных по кампаниям</div>';
-  } else {
-    const rows = campList.map(([id, c]) => {
-      const cur = c.current || {};
-      const chgC = c.change || {};
-      const leads = cur.leads || 0;
-      const cpl = leads > 0 ? fmtRub((cur.cost_rub||0) / leads) : '—';
-      const trend = chgC.clicks_pct > 5 ? '↑' : chgC.clicks_pct < -5 ? '↓' : '→';
-      const trendCls = chgC.clicks_pct > 5 ? 'pos' : chgC.clicks_pct < -5 ? 'neg' : 'neu';
-      const typeTag = c.type === 'search'
-        ? '<span class="tag tag-search">Поиск</span>'
-        : '<span class="tag tag-rsya">РСЯ</span>';
-      return `
-        <tr onclick="openModal('${id}', ${JSON.stringify(JSON.stringify(c)).slice(1,-1)})">
-          <td class="td-name">
-            <div>${c.shortName || c.name}</div>
-            <div class="td-sub">${typeTag} <span>ID ${id}</span></div>
-          </td>
-          <td class="num">${fmt(cur.impressions)}</td>
-          <td class="num">${fmt(cur.clicks)}<div class="chg">${chgHtml(chgC.clicks_pct)}</div></td>
-          <td class="num">${fmtPct(cur.ctr)}<div class="chg">${chgHtml(chgC.ctr_pp,'pp')}</div></td>
-          <td class="num">${fmtRub(cur.cost_rub)}<div class="chg">${chgHtml(chgC.cost_pct)}</div></td>
-          <td class="num">${fmtRub(cur.cpc)}</td>
-          <td class="num">${fmt(leads) || '—'}</td>
-          <td class="num">${cpl}</td>
-          <td class="trend ${trendCls}">${trend}</td>
-        </tr>`;
-    }).join('');
-
-    tableHtml = `
-      <div class="section-label">Активные кампании</div>
-      <div class="table-card">
-        <div class="table-header-row">
-          <div class="table-title">Кампании (${campList.length})</div>
-          <div class="table-hint">Нажми на строку — откроется детали</div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Кампания</th>
-              <th>Показы</th>
-              <th>Клики</th>
-              <th>CTR</th>
-              <th>Расход</th>
-              <th>CPC</th>
-              <th>Лиды</th>
-              <th>CPL</th>
-              <th>Тренд</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-  }
+  // ── Таблица (заглушка — заполняется через renderCampaigns) ──
+  const tableHtml = `
+    <div class="sec-label">Активные кампании</div>
+    <div class="camp-filter">
+      <button class="camp-tab active" data-type="all"    onclick="setCampType('all')">Все</button>
+      <button class="camp-tab"        data-type="search" onclick="setCampType('search')">Поиск</button>
+      <button class="camp-tab"        data-type="rsya"   onclick="setCampType('rsya')">РСЯ</button>
+      <button class="camp-tab"        data-type="other"  onclick="setCampType('other')">Не классифицировано</button>
+    </div>
+    <div id="campTable"></div>`;
 
   document.getElementById('mainContent').innerHTML =
     kpiHtml + chartsHtml + funnelHtml + tableHtml;
 
-  // ── Init charts ──
+  // ── Charts ──
   requestAnimationFrame(() => {
-    // Визиты
-    const ctx1 = document.getElementById('visitsChart');
-    if (ctx1 && dateLabels.length > 0) {
-      charts.visits = new Chart(ctx1, {
-        type: 'line',
-        data: {
-          labels: dateLabels,
-          datasets: [
-            {
-              label: 'Визиты',
-              data: visitData,
-              borderColor: '#6366f1',
-              backgroundColor: 'rgba(99,102,241,0.12)',
-              fill: true, tension: 0.4, pointRadius: 2, pointHoverRadius: 5,
-              borderWidth: 2,
-            },
-            {
-              label: 'Вовлечённые',
-              data: engData,
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16,185,129,0.08)',
-              fill: true, tension: 0.4, pointRadius: 2, pointHoverRadius: 5,
-              borderWidth: 2,
-            }
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { display: true, position: 'top',
-              labels: { boxWidth: 10, padding: 16, font: { size: 11 } } },
-            tooltip: { mode: 'index', intersect: false }
-          },
-          scales: {
-            x: { grid: { color: '#1e2235' }, ticks: { maxTicksLimit: 10 } },
-            y: { grid: { color: '#1e2235' }, beginAtZero: true }
-          }
-        }
+    const gridColor = GRID_COLOR();
+
+    const ctx1 = document.getElementById('visChart');
+    if (ctx1 && dateLabels.length>0) {
+      charts.vis = new Chart(ctx1, {
+        type:'line',
+        data:{ labels:dateLabels, datasets:[
+          { label:'Визиты',      data:visitData, borderColor:'#6366f1',
+            backgroundColor:'rgba(99,102,241,.1)', fill:true, tension:.4, pointRadius:2, borderWidth:2 },
+          { label:'Вовлечённые', data:engData,   borderColor:'#10b981',
+            backgroundColor:'rgba(16,185,129,.08)', fill:true, tension:.4, pointRadius:2, borderWidth:2 },
+        ]},
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:true,position:'top',labels:{boxWidth:10,padding:14,font:{size:11}}},
+                    tooltip:{mode:'index',intersect:false} },
+          scales:{ x:{grid:{color:gridColor},ticks:{maxTicksLimit:10}},
+                   y:{grid:{color:gridColor},beginAtZero:true} } }
       });
     }
 
-    // Расход — если нет daily данных директа, строим заглушку
     const ctx2 = document.getElementById('costChart');
     if (ctx2) {
-      const dirDaily = dir.current?.daily || [];
-      const costLabels = dirDaily.length > 0
-        ? dirDaily.map(d => d.date?.slice(5))
-        : dateLabels;
-      const costData = dirDaily.length > 0
-        ? dirDaily.map(d => d.cost_rub || d.cost || 0)
-        : dateLabels.map(() => Math.round((ct.cost_rub || 0) / Math.max(dateLabels.length, 1)));
-
       charts.cost = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: costLabels,
-          datasets: [{
-            label: 'Расход ₽',
-            data: costData,
-            backgroundColor: 'rgba(99,102,241,0.5)',
-            borderColor: '#6366f1',
-            borderWidth: 1,
-            borderRadius: 5,
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
-          scales: {
-            x: { grid: { color: '#1e2235' }, ticks: { maxTicksLimit: 10 } },
-            y: { grid: { color: '#1e2235' }, beginAtZero: true }
-          }
-        }
+        type:'bar',
+        data:{ labels: costLabels.map(d=>d.slice(5)),
+               datasets:[{ label:'Расход ₽', data:costData,
+                 backgroundColor:'rgba(99,102,241,.5)', borderColor:'#6366f1',
+                 borderWidth:1, borderRadius:5 }] },
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false} },
+          scales:{ x:{grid:{color:gridColor},ticks:{maxTicksLimit:10}},
+                   y:{grid:{color:gridColor},beginAtZero:true} } }
       });
     }
   });
+
+  renderCampaigns();
 }
 
-// ── Modal ──
-function openModal(campId, campJson) {
+// ─── Таблица кампаний ─────────────────────────────────────────────────────────
+function renderCampaigns() {
+  if (!_campData) return;
+  const showComp = state.compare === 'prev';
+
+  const filtered = _campData.filter(c => {
+    if (state.campType==='all') return true;
+    return c.type === state.campType;
+  });
+
+  // Сбрасываем активный таб
+  document.querySelectorAll('.camp-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === state.campType);
+  });
+
+  const el = document.getElementById('campTable');
+  if (!el) return;
+
+  if (filtered.length===0) {
+    el.innerHTML='<div class="no-data" style="padding:30px">Нет кампаний</div>'; return;
+  }
+
+  const rows = filtered.map(c => {
+    const cur = c.cur;
+    const chg = c.change;
+    const typeTag = c.type==='search'
+      ? '<span class="tag tag-search">Поиск</span>'
+      : c.type==='rsya'
+        ? '<span class="tag tag-rsya">РСЯ</span>'
+        : '<span class="tag tag-other">?</span>';
+
+    const trend    = chg.clicks_pct>5 ? '↑' : chg.clicks_pct<-5 ? '↓' : '→';
+    const trendCls = chg.clicks_pct>5 ? 'trend-up' : chg.clicks_pct<-5 ? 'trend-dn' : 'trend-fl';
+    const campJson = JSON.stringify({
+      name:c.name, type:c.type, cur, change:chg, daily:c.filteredDaily
+    }).replace(/'/g,"\\'");
+
+    return `<tr onclick="openModal('${c.id}','${campJson}')">
+      <td class="td-name">
+        <div>${c.shortName||c.name}</div>
+        <div class="td-sub">${typeTag}<span>ID ${c.id}</span></div>
+      </td>
+      <td class="num">${fmt(cur.impressions)}</td>
+      <td class="num">${fmt(cur.clicks)}${showComp?`<div class="chg">${chgHtml(chg.clicks_pct)}</div>`:''}</td>
+      <td class="num">${fmtPct(cur.ctr)}${showComp?`<div class="chg">${chgHtml(chg.ctr_pp,'pp')}</div>`:''}</td>
+      <td class="num">${fmtRub(cur.cost_rub)}${showComp?`<div class="chg">${chgHtml(chg.cost_pct)}</div>`:''}</td>
+      <td class="num">${fmtRub(cur.cpc)}</td>
+      <td class="num ${trendCls}">${trend}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="table-card">
+      <div class="table-head-row">
+        <div class="table-title">Кампании (${filtered.length})</div>
+        <div class="table-hint">Нажми на строку для деталей</div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Кампания</th><th>Показы</th><th>Клики</th>
+          <th>CTR</th><th>Расход</th><th>CPC</th><th>Тренд</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+function openModal(id, campJson) {
   const c = JSON.parse(campJson);
-  const cur = c.current || {};
-  const chgC = c.change || {};
-  const leads = cur.leads || 0;
-  const cpl = leads > 0 ? fmtRub(cur.cost_rub / leads) : '—';
+  document.getElementById('mTitle').textContent = c.name || id;
+  const typeTag = c.type==='search'
+    ? '<span class="tag tag-search">Поиск</span>'
+    : c.type==='rsya'
+      ? '<span class="tag tag-rsya">РСЯ</span>'
+      : '<span class="tag tag-other">?</span>';
+  document.getElementById('mSub').innerHTML = `${typeTag} &nbsp; ID: ${id}`;
 
-  document.getElementById('modalTitle').textContent = c.name || campId;
-  document.getElementById('modalSub').innerHTML =
-    `${c.type === 'search' ? '<span class="tag tag-search">Поиск</span>' : '<span class="tag tag-rsya">РСЯ</span>'} &nbsp; ID: ${campId}`;
+  document.getElementById('mKpi').innerHTML = [
+    {l:'Показы',  v:fmt(c.cur.impressions)},
+    {l:'Клики',   v:fmt(c.cur.clicks)},
+    {l:'CTR',     v:fmtPct(c.cur.ctr)},
+    {l:'Расход',  v:fmtRub(c.cur.cost_rub)},
+    {l:'CPC',     v:fmtRub(c.cur.cpc)},
+    {l:'Тренд',   v:c.change.clicks_pct!=null ? chgHtml(c.change.clicks_pct) : '—'},
+  ].map(k=>`<div class="modal-kpi-item">
+    <div class="modal-kpi-lbl">${k.l}</div>
+    <div class="modal-kpi-val">${k.v}</div>
+  </div>`).join('');
 
-  document.getElementById('modalKpi').innerHTML = [
-    {label:'Показы',  val: fmt(cur.impressions)},
-    {label:'Клики',   val: fmt(cur.clicks)},
-    {label:'CTR',     val: fmtPct(cur.ctr)},
-    {label:'Расход',  val: fmtRub(cur.cost_rub)},
-    {label:'CPC',     val: fmtRub(cur.cpc)},
-    {label:'Лиды',    val: fmt(leads) || '—'},
-  ].map(k => `
-    <div class="modal-kpi-item">
-      <div class="modal-kpi-label">${k.label}</div>
-      <div class="modal-kpi-val">${k.val}</div>
-    </div>`).join('');
-
-  // Modal chart
-  if (modalChart) modalChart.destroy();
+  if (mChart) mChart.destroy();
   const daily = c.daily || [];
-  const mctx = document.getElementById('modalChart');
-  if (mctx && daily.length > 0) {
-    modalChart = new Chart(mctx, {
-      type: 'line',
-      data: {
-        labels: daily.map(d => d.date?.slice(5)),
-        datasets: [{
-          label: 'Клики',
-          data: daily.map(d => d.clicks || 0),
-          borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)',
-          fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { color: '#1e2235' } },
-          y: { grid: { color: '#1e2235' }, beginAtZero: true }
-        }
-      }
+  const mctx  = document.getElementById('mChart');
+  if (mctx && daily.length>0) {
+    mChart = new Chart(mctx, {
+      type:'line',
+      data:{ labels:daily.map(d=>d.date?.slice(5)),
+             datasets:[{ label:'Клики', data:daily.map(d=>+d.clicks||0),
+               borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,.1)',
+               fill:true, tension:.4, pointRadius:2, borderWidth:2 }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false} },
+        scales:{ x:{grid:{color:GRID_COLOR()}}, y:{grid:{color:GRID_COLOR()},beginAtZero:true} } }
     });
   } else if (mctx) {
-    mctx.parentElement.innerHTML =
-      '<div style="color:var(--text3);text-align:center;padding:40px;font-size:12px">Нет детальных данных по дням</div>';
+    mctx.closest('.modal-chart').innerHTML =
+      '<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">Нет данных по дням</div>';
   }
 
   document.getElementById('modalOverlay').classList.add('open');
 }
 
 function closeModal(e) {
-  if (!e || e.target === document.getElementById('modalOverlay') || e.currentTarget === document.querySelector('.modal-close')) {
+  if (!e || e.target === document.getElementById('modalOverlay')) {
     document.getElementById('modalOverlay').classList.remove('open');
   }
 }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-// ── Init ──
+// ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initSelector();
-  const id = D.meta?.default_account_id || D.meta?.account_ids?.[0];
-  if (id) renderDashboard(id);
-  else document.getElementById('mainContent').innerHTML = '<div class="no-data">Нет данных</div>';
+  render();
 });
 </script>
 </body>
