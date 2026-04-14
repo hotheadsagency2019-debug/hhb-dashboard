@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HHB Dashboard — Яндекс Директ + Метрика</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #1a1d27;
+    --bg3: #242736;
+    --border: #2e3248;
+    --text: #e8eaf0;
+    --text2: #8b90a7;
+    --accent: #5c6ef8;
+    --accent2: #7c8af8;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --radius: 12px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Header ── */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo { font-weight: 700; font-size: 18px; color: var(--accent2); letter-spacing: -0.5px; }
+  .header-sep { width: 1px; height: 24px; background: var(--border); }
+  .header-select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    min-width: 220px;
+    outline: none;
+  }
+  .header-select:focus { border-color: var(--accent); }
+  .header-meta { margin-left: auto; font-size: 12px; color: var(--text2); }
+  .header-period { font-size: 13px; color: var(--text2); }
+
+  /* ── Layout ── */
+  .main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* ── KPI Cards ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .kpi-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+  .kpi-change { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+  .kpi-change.pos { color: var(--green); }
+  .kpi-change.neg { color: var(--red); }
+  .kpi-change.neu { color: var(--text2); }
+  .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 24px; }
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+
+  /* ── Charts Row ── */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .chart-card-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; color: var(--text2); }
+  .chart-wrap { position: relative; height: 200px; }
+
+  /* ── Funnel ── */
+  .funnel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 900px) { .funnel-row { grid-template-columns: 1fr; } }
+
+  .funnel-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .funnel-card-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; color: var(--text2); }
+  .funnel-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .funnel-bar-wrap { flex: 1; height: 28px; background: var(--bg3); border-radius: 6px; overflow: hidden; }
+  .funnel-bar { height: 100%; border-radius: 6px; transition: width 0.6s ease; display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; }
+  .funnel-label { font-size: 12px; color: var(--text2); width: 90px; text-align: right; }
+  .funnel-value { font-size: 12px; font-weight: 600; width: 70px; }
+
+  /* ── Table ── */
+  .table-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text2); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 10px 16px; text-align: left; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); font-weight: 500; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg3); }
+  .td-name { font-weight: 500; max-width: 280px; }
+  .td-name-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+  .tag-search { background: #1e3a5f; color: #60a5fa; }
+  .tag-rsya { background: #1e4a3a; color: #34d399; }
+  .num { font-variant-numeric: tabular-nums; }
+  .change-pos { color: var(--green); font-size: 11px; }
+  .change-neg { color: var(--red); font-size: 11px; }
+  .change-neu { color: var(--text2); font-size: 11px; }
+
+  /* ── No data ── */
+  .no-data { padding: 40px; text-align: center; color: var(--text2); font-size: 14px; }
+
+  /* ── Footer ── */
+  .footer { text-align: center; padding: 32px 24px; color: var(--text2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">HHB Dashboard</div>
+  <div class="header-sep"></div>
+  <select class="header-select" id="accountSelect" onchange="switchAccount(this.value)">
+    <option value="">Загрузка...</option>
+  </select>
+  <div class="header-period" id="headerPeriod"></div>
+  <div class="header-meta" id="headerMeta"></div>
+</div>
+
+<div class="main" id="mainContent">
+  <div class="no-data">Загрузка данных...</div>
+</div>
+
+<div class="footer" id="footer"></div>
+
+<script>
+// ── Данные, сгенерированные скриптом ──
+window.__DASHBOARD_DATA__ = __DASHBOARD_DATA_PLACEHOLDER__;
+
+// ── Утилиты ──
+const D = window.__DASHBOARD_DATA__;
+let currentChart1 = null, currentChart2 = null;
+
+function fmt(n, decimals = 0) {
+  if (n == null || isNaN(n)) return '—';
+  return Number(n).toLocaleString('ru-RU', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function fmtRub(n) {
+  if (n == null || isNaN(n)) return '—';
+  return fmt(n, 0) + ' ₽';
+}
+
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return Number(n).toFixed(1) + '%';
+}
+
+function changeClass(n) {
+  if (!n || n === 0) return 'change-neu';
+  return n > 0 ? 'change-pos' : 'change-neg';
+}
+
+function changeArrow(n) {
+  if (!n || n === 0) return '';
+  return n > 0 ? '↑' : '↓';
+}
+
+function changeHtml(n, suffix = '%') {
+  if (!n && n !== 0) return '<span class="change-neu">—</span>';
+  const cls = changeClass(n);
+  const arrow = changeArrow(n);
+  return `<span class="${cls}">${arrow}${Math.abs(n).toFixed(1)}${suffix}</span>`;
+}
+
+// ── Инициализация селектора аккаунтов ──
+function initAccountSelector() {
+  const sel = document.getElementById('accountSelect');
+  sel.innerHTML = '';
+  const meta = D.meta;
+  if (!meta || !meta.account_ids || meta.account_ids.length === 0) {
+    sel.innerHTML = '<option value="">Нет аккаунтов</option>';
+    return;
+  }
+  meta.account_ids.forEach(id => {
+    const acc = D.accounts[id];
+    const name = acc?.meta?.project_name || id;
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = name;
+    sel.appendChild(opt);
+  });
+  sel.value = meta.default_account_id || meta.account_ids[0];
+}
+
+// ── Переключение аккаунта ──
+function switchAccount(accountId) {
+  if (!accountId) return;
+  renderDashboard(accountId);
+}
+
+// ── Рендер дашборда ──
+function renderDashboard(accountId) {
+  const acc = D.accounts[accountId];
+  if (!acc) {
+    document.getElementById('mainContent').innerHTML = '<div class="no-data">Данные не найдены</div>';
+    return;
+  }
+
+  if (acc.error) {
+    document.getElementById('mainContent').innerHTML =
+      `<div class="no-data">Ошибка загрузки данных: ${acc.error}</div>`;
+    return;
+  }
+
+  const meta = acc.meta || {};
+  const direct = acc.direct || {};
+  const metrica = acc.metrica || {};
+  const ct = direct.current?.totals || {};
+  const pt = direct.prev?.totals || {};
+  const mt = metrica.current?.totals || {};
+  const mpt = metrica.prev?.totals || {};
+  const change = direct.change || {};
+  const campaigns = direct.campaign_summaries || {};
+
+  // Header meta
+  document.getElementById('headerPeriod').textContent =
+    `${meta.date_from} — ${meta.date_to}`;
+  document.getElementById('headerMeta').textContent =
+    `Обновлено: ${meta.generated_at ? new Date(meta.generated_at).toLocaleString('ru-RU') : '—'}`;
+
+  // Footer
+  document.getElementById('footer').textContent =
+    `HHB Dashboard • hotheads-marketing • Данные: Яндекс Директ + Метрика • Сгенерировано ${meta.generated_at ? new Date(meta.generated_at).toLocaleString('ru-RU') : ''}`;
+
+  // ── KPI карточки ──
+  const ctr = ct.ctr || 0;
+  const ptctr = pt.ctr || 0;
+  const kpiCards = [
+    { label: 'Показы', value: fmt(ct.impressions), change: change.impressions_pct, suffix: '%' },
+    { label: 'Клики', value: fmt(ct.clicks), change: change.clicks_pct, suffix: '%' },
+    { label: 'CTR', value: fmtPct(ct.ctr), change: change.ctr_pp, suffix: 'pp', raw: true },
+    { label: 'Расход', value: fmtRub(ct.cost_rub), change: change.cost_pct, suffix: '%' },
+    { label: 'CPC', value: fmtRub(ct.cpc), change: change.cpc_pct, suffix: '%', invertColor: true },
+    { label: 'Визиты', value: fmt(mt.visits), change: mt.visits && mpt.visits ? ((mt.visits - mpt.visits) / (mpt.visits || 1) * 100) : null, suffix: '%' },
+    { label: 'Вовлечённые', value: fmt(mt.engaged), change: null },
+    { label: 'Лиды', value: fmt(mt.leads) || '—', change: null },
+  ];
+
+  let kpiHtml = '<div class="kpi-grid">';
+  kpiCards.forEach(k => {
+    let chgHtml = '';
+    if (k.change != null) {
+      const val = k.raw ? k.change : k.change;
+      const cls = k.invertColor
+        ? (val > 0 ? 'neg' : val < 0 ? 'pos' : 'neu')
+        : (val > 0 ? 'pos' : val < 0 ? 'neg' : 'neu');
+      const arrow = val > 0 ? '↑' : val < 0 ? '↓' : '';
+      chgHtml = `<div class="kpi-change ${cls}">${arrow} ${Math.abs(val).toFixed(1)}${k.suffix} к пред. периоду</div>`;
+    }
+    kpiHtml += `
+      <div class="kpi-card">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${k.value}</div>
+        ${chgHtml}
+      </div>`;
+  });
+  kpiHtml += '</div>';
+
+  // ── Воронка ──
+  const directVisits = mt.visits || ct.clicks || 0;
+  const engaged = mt.engaged || 0;
+  const leads = mt.leads || 0;
+  const maxFunnel = Math.max(ct.impressions || 0, 1);
+  const maxFunnel2 = Math.max(ct.impressions || 0, 1);
+
+  function funnelBar(val, max, color) {
+    const w = Math.min(100, Math.round(val / max * 100));
+    return `<div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${w}%;background:${color}">${w}%</div></div>`;
+  }
+
+  const funnelHtml = `
+    <div class="funnel-row">
+      <div class="funnel-card">
+        <div class="funnel-card-title">Воронка — Весь сайт</div>
+        <div class="funnel-step">
+          <div class="funnel-label">Визиты</div>
+          ${funnelBar(mt.visits || 0, Math.max(mt.visits||0,1), '#5c6ef8')}
+          <div class="funnel-value">${fmt(mt.visits)}</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label">Вовлечённые</div>
+          ${funnelBar(engaged, Math.max(mt.visits||0,1), '#7c8af8')}
+          <div class="funnel-value">${fmt(engaged)}</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label">Лиды</div>
+          ${funnelBar(leads, Math.max(mt.visits||0,1), '#34d399')}
+          <div class="funnel-value">${fmt(leads) || '—'}</div>
+        </div>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-card-title">Воронка — Яндекс Директ</div>
+        <div class="funnel-step">
+          <div class="funnel-label">Показы</div>
+          ${funnelBar(ct.impressions||0, Math.max(ct.impressions||0,1), '#5c6ef8')}
+          <div class="funnel-value">${fmt(ct.impressions)}</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label">Клики</div>
+          ${funnelBar(ct.clicks||0, Math.max(ct.impressions||0,1), '#7c8af8')}
+          <div class="funnel-value">${fmt(ct.clicks)}</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label">Визиты</div>
+          ${funnelBar(directVisits, Math.max(ct.impressions||0,1), '#a5b4fc')}
+          <div class="funnel-value">${fmt(directVisits)}</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-label">Лиды</div>
+          ${funnelBar(leads, Math.max(ct.impressions||0,1), '#34d399')}
+          <div class="funnel-value">${fmt(leads) || '—'}</div>
+        </div>
+      </div>
+    </div>`;
+
+  // ── Графики ──
+  const daily = metrica.current?.daily || [];
+  const chartsHtml = `
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-title">Визиты по дням</div>
+        <div class="chart-wrap"><canvas id="visitsChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Клики и расход по дням</div>
+        <div class="chart-wrap"><canvas id="clicksChart"></canvas></div>
+      </div>
+    </div>`;
+
+  // ── Таблица кампаний ──
+  const campList = Object.entries(campaigns);
+  let tableHtml = '';
+  if (campList.length === 0) {
+    tableHtml = '<div class="no-data">Нет данных по кампаниям</div>';
+  } else {
+    const rows = campList.map(([id, c]) => {
+      const cur = c.current || {};
+      const chg = c.change || {};
+      const typeTag = c.type === 'search'
+        ? '<span class="tag tag-search">Поиск</span>'
+        : '<span class="tag tag-rsya">РСЯ</span>';
+      return `
+        <tr>
+          <td class="td-name">
+            <div>${c.shortName || c.name}</div>
+            <div class="td-name-sub">${typeTag} ID: ${id}</div>
+          </td>
+          <td class="num">${fmt(cur.impressions)}</td>
+          <td class="num">${fmt(cur.clicks)}<br>${changeHtml(chg.clicks_pct)}</td>
+          <td class="num">${fmtPct(cur.ctr)}<br>${changeHtml(chg.ctr_pp, 'pp')}</td>
+          <td class="num">${fmtRub(cur.cost_rub)}<br>${changeHtml(chg.cost_pct)}</td>
+          <td class="num">${fmtRub(cur.cpc)}</td>
+        </tr>`;
+    }).join('');
+
+    tableHtml = `
+      <div class="table-card">
+        <div class="table-header">Кампании</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Кампания</th>
+              <th>Показы</th>
+              <th>Клики</th>
+              <th>CTR</th>
+              <th>Расход</th>
+              <th>CPC</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  // ── Собираем страницу ──
+  document.getElementById('mainContent').innerHTML =
+    kpiHtml + funnelHtml + chartsHtml + tableHtml;
+
+  // ── Инициализируем графики ──
+  if (currentChart1) currentChart1.destroy();
+  if (currentChart2) currentChart2.destroy();
+
+  const labels = daily.map(d => d.date?.slice(5) || d.date);
+  const visitData = daily.map(d => d.visits || 0);
+
+  // График визитов
+  const ctx1 = document.getElementById('visitsChart');
+  if (ctx1 && labels.length > 0) {
+    currentChart1 = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Визиты',
+          data: visitData,
+          borderColor: '#5c6ef8',
+          backgroundColor: 'rgba(92,110,248,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
+          y: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
+        }
+      }
+    });
+  }
+
+  // График кликов — используем direct daily если есть, иначе flat line
+  const directDaily = direct.current?.daily || [];
+  const clickLabels = directDaily.length > 0
+    ? directDaily.map(d => d.date?.slice(5))
+    : labels;
+  const clickData = directDaily.length > 0
+    ? directDaily.map(d => d.clicks || 0)
+    : new Array(labels.length).fill(Math.round((ct.clicks || 0) / Math.max(labels.length, 1)));
+
+  const ctx2 = document.getElementById('clicksChart');
+  if (ctx2) {
+    currentChart2 = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: clickLabels,
+        datasets: [{
+          label: 'Клики',
+          data: clickData,
+          backgroundColor: 'rgba(92,110,248,0.6)',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
+          y: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
+        }
+      }
+    });
+  }
+}
+
+// ── Запуск ──
+document.addEventListener('DOMContentLoaded', () => {
+  initAccountSelector();
+  const defaultId = D.meta?.default_account_id || D.meta?.account_ids?.[0];
+  if (defaultId) renderDashboard(defaultId);
+  else document.getElementById('mainContent').innerHTML = '<div class="no-data">Нет данных</div>';
+});
+</script>
+</body>
+</html>

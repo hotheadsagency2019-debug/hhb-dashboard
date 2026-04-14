@@ -1,0 +1,19 @@
+{
+  "direct_login": "hotheads-marketing",
+  "accounts": [
+    {
+      "id": "account_1",
+      "name": "Аккаунт 1",
+      "direct_client_login": "client-login-1",
+      "metrica_counter_ids": ["12345678"],
+      "goal_ids": []
+    },
+    {
+      "id": "account_2",
+      "name": "Аккаунт 2",
+      "direct_client_login": "client-login-2",
+      "metrica_counter_ids": ["87654321"],
+      "goal_ids": []
+    }
+  ]
+}

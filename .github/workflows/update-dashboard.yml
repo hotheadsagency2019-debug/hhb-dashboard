@@ -1,0 +1,52 @@
+name: Update HHB Dashboard
+
+on:
+  # Запуск каждый день в 06:00 UTC (09:00 Москва)
+  schedule:
+    - cron: '0 6 * * *'
+
+  # Ручной запуск из GitHub UI (кнопка Run workflow)
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Период в днях'
+        required: false
+        default: '30'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # нужно для push в gh-pages
+
+    steps:
+      - name: Checkout репозитория
+        uses: actions/checkout@v4
+
+      - name: Настройка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Генерация дашборда
+        env:
+          YANDEX_TOKEN: ${{ secrets.YANDEX_TOKEN }}
+        run: |
+          DAYS="${{ github.event.inputs.days || '30' }}"
+          python scripts/generate_dashboard.py \
+            --days "$DAYS" \
+            --accounts accounts.json \
+            --template templates/dashboard_template.html \
+            --out docs/index.html
+
+      - name: Добавить .nojekyll (отключает Jekyll у GitHub Pages)
+        run: touch docs/.nojekyll
+
+      - name: Публикация в gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          commit_message: |
+            dashboard: обновление $(date +'%Y-%m-%d %H:%M UTC')
