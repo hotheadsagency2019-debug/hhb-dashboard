@@ -3,17 +3,17 @@
   "accounts": [
     {
       "id": "account_1",
-      "name": "Аккаунт 1",
-      "direct_client_login": "client-login-1",
-      "metrica_counter_ids": ["12345678"],
-      "goal_ids": []
+      "name": "artseasonshhb-v",
+      "direct_client_login": "cartseasonshhb-v",
+      "metrica_counter_ids": ["84236269"],
+      "goal_ids": ["320278892", "306955254"]
     },
     {
       "id": "account_2",
-      "name": "Аккаунт 2",
-      "direct_client_login": "client-login-2",
-      "metrica_counter_ids": ["87654321"],
-      "goal_ids": []
+      "name": "porg-3awqiy2m",
+      "direct_client_login": "papaparit-hhbv",
+      "metrica_counter_ids": ["97521339"],
+      "goal_ids": ["545463626"]
     }
   ]
 }
