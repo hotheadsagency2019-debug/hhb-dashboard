@@ -6,170 +6,196 @@
 <title>HHB Dashboard — Яндекс Директ + Метрика</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0f1117;
-    --bg2: #1a1d27;
-    --bg3: #242736;
-    --border: #2e3248;
-    --text: #e8eaf0;
-    --text2: #8b90a7;
-    --accent: #5c6ef8;
-    --accent2: #7c8af8;
-    --green: #34d399;
-    --red: #f87171;
-    --yellow: #fbbf24;
-    --radius: 12px;
-    --shadow: 0 2px 16px rgba(0,0,0,0.4);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-         background: var(--bg); color: var(--text); min-height: 100vh; }
+:root {
+  --bg:      #0d0f18;
+  --bg2:     #161929;
+  --bg3:     #1e2235;
+  --bg4:     #252840;
+  --border:  #2a2f4a;
+  --text:    #e2e5f0;
+  --text2:   #7c82a3;
+  --text3:   #545878;
+  --accent:  #6366f1;
+  --accent2: #818cf8;
+  --green:   #10b981;
+  --red:     #ef4444;
+  --yellow:  #f59e0b;
+  --radius:  14px;
+  --shadow:  0 4px 24px rgba(0,0,0,0.5);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+       background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
 
-  /* ── Header ── */
-  .header {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    height: 60px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-logo { font-weight: 700; font-size: 18px; color: var(--accent2); letter-spacing: -0.5px; }
-  .header-sep { width: 1px; height: 24px; background: var(--border); }
-  .header-select {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    min-width: 220px;
-    outline: none;
-  }
-  .header-select:focus { border-color: var(--accent); }
-  .header-meta { margin-left: auto; font-size: 12px; color: var(--text2); }
-  .header-period { font-size: 13px; color: var(--text2); }
+/* ── Header ── */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 58px;
+  position: sticky; top: 0; z-index: 200;
+}
+.logo { font-weight: 800; font-size: 17px; letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #818cf8, #6366f1); -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent; white-space: nowrap; }
+.sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+.account-select {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+  min-width: 200px; outline: none; transition: border-color .2s;
+}
+.account-select:focus { border-color: var(--accent); }
+.header-period { font-size: 12px; color: var(--text2); }
+.header-right { margin-left: auto; font-size: 11px; color: var(--text3); }
 
-  /* ── Layout ── */
-  .main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+/* ── Main ── */
+.main { max-width: 1440px; margin: 0 auto; padding: 24px 28px; }
+.section-label {
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+}
 
-  /* ── KPI Cards ── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .kpi-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-  }
-  .kpi-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .kpi-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
-  .kpi-change { font-size: 12px; display: flex; align-items: center; gap: 4px; }
-  .kpi-change.pos { color: var(--green); }
-  .kpi-change.neg { color: var(--red); }
-  .kpi-change.neu { color: var(--text2); }
-  .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+/* ── KPI Grid ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 14px; margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
+  transition: border-color .2s, transform .15s;
+}
+.kpi-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity: 0; transition: opacity .2s;
+}
+.kpi-card:hover::before { opacity: 1; }
+.kpi-label { font-size: 11px; color: var(--text2); text-transform: uppercase;
+             letter-spacing: 0.5px; margin-bottom: 10px; }
+.kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 8px;
+             font-variant-numeric: tabular-nums; }
+.kpi-change { font-size: 12px; display: flex; align-items: center; gap: 5px; }
+.pos { color: var(--green); } .neg { color: var(--red); } .neu { color: var(--text3); }
+.kpi-vs { font-size: 11px; color: var(--text3); margin-top: 3px; }
 
-  /* ── Section ── */
-  .section { margin-bottom: 24px; }
-  .section-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 16px;
-  }
+/* ── Charts Row ── */
+.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 1000px) { .charts-row { grid-template-columns: 1fr; } }
 
-  /* ── Charts Row ── */
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+.chart-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+}
+.chart-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 16px; }
+.chart-wrap { position: relative; height: 220px; }
 
-  .chart-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-  }
-  .chart-card-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; color: var(--text2); }
-  .chart-wrap { position: relative; height: 200px; }
+/* ── Funnel ── */
+.funnel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 900px) { .funnel-row { grid-template-columns: 1fr; } }
 
-  /* ── Funnel ── */
-  .funnel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  @media (max-width: 900px) { .funnel-row { grid-template-columns: 1fr; } }
+.funnel-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+}
+.funnel-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 18px; }
+.funnel-step { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.funnel-name { font-size: 12px; color: var(--text2); width: 100px; text-align: right; flex-shrink: 0; }
+.funnel-track { flex: 1; height: 30px; background: var(--bg3); border-radius: 7px; overflow: hidden; }
+.funnel-bar {
+  height: 100%; border-radius: 7px; display: flex; align-items: center;
+  padding: 0 10px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.9);
+  min-width: 30px; transition: width 0.8s cubic-bezier(.4,0,.2,1);
+}
+.funnel-val { font-size: 13px; font-weight: 600; width: 80px; font-variant-numeric: tabular-nums; }
+.funnel-conv { font-size: 10px; color: var(--text3); }
 
-  .funnel-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-  }
-  .funnel-card-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; color: var(--text2); }
-  .funnel-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .funnel-bar-wrap { flex: 1; height: 28px; background: var(--bg3); border-radius: 6px; overflow: hidden; }
-  .funnel-bar { height: 100%; border-radius: 6px; transition: width 0.6s ease; display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; }
-  .funnel-label { font-size: 12px; color: var(--text2); width: 90px; text-align: right; }
-  .funnel-value { font-size: 12px; font-weight: 600; width: 70px; }
+/* ── Campaigns Table ── */
+.table-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); margin-bottom: 24px;
+}
+.table-header-row {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.table-title { font-size: 13px; font-weight: 600; color: var(--text2); }
+.table-hint { font-size: 11px; color: var(--text3); }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  padding: 10px 16px; text-align: left; font-size: 11px; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border);
+  font-weight: 500; white-space: nowrap;
+}
+tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { cursor: pointer; transition: background .15s; }
+tbody tr:hover td { background: var(--bg3); }
+.td-name { font-weight: 500; }
+.td-sub { font-size: 11px; color: var(--text3); margin-top: 3px; display: flex; gap: 6px; }
+.tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+.tag-search { background: #1e3060; color: #93c5fd; }
+.tag-rsya   { background: #14402e; color: #6ee7b7; }
+.num { font-variant-numeric: tabular-nums; }
+.chg { font-size: 11px; margin-top: 2px; }
+.trend { font-size: 18px; }
 
-  /* ── Table ── */
-  .table-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    margin-bottom: 24px;
-  }
-  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text2); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { padding: 10px 16px; text-align: left; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); font-weight: 500; }
-  td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--bg3); }
-  .td-name { font-weight: 500; max-width: 280px; }
-  .td-name-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
-  .tag-search { background: #1e3a5f; color: #60a5fa; }
-  .tag-rsya { background: #1e4a3a; color: #34d399; }
-  .num { font-variant-numeric: tabular-nums; }
-  .change-pos { color: var(--green); font-size: 11px; }
-  .change-neg { color: var(--red); font-size: 11px; }
-  .change-neu { color: var(--text2); font-size: 11px; }
+/* ── Sparkline column ── */
+.spark-wrap { width: 80px; height: 32px; }
 
-  /* ── No data ── */
-  .no-data { padding: 40px; text-align: center; color: var(--text2); font-size: 14px; }
+/* ── Modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 18px;
+  width: 640px; max-width: 95vw; max-height: 85vh; overflow-y: auto;
+  padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+}
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.modal-close { background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+               width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
+               display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-close:hover { background: var(--bg4); }
+.modal-kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.modal-kpi-item { background: var(--bg3); border-radius: 10px; padding: 14px; }
+.modal-kpi-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.modal-kpi-val { font-size: 20px; font-weight: 700; }
+.modal-chart-wrap { height: 160px; margin-bottom: 8px; }
 
-  /* ── Footer ── */
-  .footer { text-align: center; padding: 32px 24px; color: var(--text2); font-size: 12px; border-top: 1px solid var(--border); margin-top: 24px; }
+/* ── No data ── */
+.no-data { padding: 60px; text-align: center; color: var(--text3); font-size: 14px; }
+
+/* ── Footer ── */
+.footer { text-align: center; padding: 28px; color: var(--text3); font-size: 11px;
+          border-top: 1px solid var(--border); margin-top: 8px; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-logo">HHB Dashboard</div>
-  <div class="header-sep"></div>
-  <select class="header-select" id="accountSelect" onchange="switchAccount(this.value)">
-    <option value="">Загрузка...</option>
+  <div class="logo">HHB Dashboard</div>
+  <div class="sep"></div>
+  <select class="account-select" id="accountSelect" onchange="switchAccount(this.value)">
+    <option>Загрузка...</option>
   </select>
   <div class="header-period" id="headerPeriod"></div>
-  <div class="header-meta" id="headerMeta"></div>
+  <div class="header-right" id="headerMeta"></div>
 </div>
 
 <div class="main" id="mainContent">
@@ -178,11 +204,26 @@
 
 <div class="footer" id="footer"></div>
 
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-kpi" id="modalKpi"></div>
+    <div class="chart-title" style="margin-bottom:12px">Динамика кликов</div>
+    <div class="modal-chart-wrap"><canvas id="modalChart"></canvas></div>
+  </div>
+</div>
+
 <script>
-// ── Данные, сгенерированные скриптом ──
 window.__DASHBOARD_DATA__ = {
   "meta": {
-    "generated_at": "2026-04-14T19:08:09.238484Z",
+    "generated_at": "2026-04-14T19:20:11.998307Z",
     "date_from": "2026-03-15",
     "date_to": "2026-04-13",
     "tool": "hhb-dashboard",
@@ -196,7 +237,7 @@ window.__DASHBOARD_DATA__ = {
   "accounts": {
     "account_1": {
       "meta": {
-        "generated_at": "2026-04-14T19:08:04.487511Z",
+        "generated_at": "2026-04-14T19:20:07.506670Z",
         "date_from": "2026-03-15",
         "date_to": "2026-04-13",
         "prev_date_from": "2026-02-13",
@@ -888,7 +929,7 @@ window.__DASHBOARD_DATA__ = {
     },
     "account_2": {
       "meta": {
-        "generated_at": "2026-04-14T19:08:09.238470Z",
+        "generated_at": "2026-04-14T19:20:11.998295Z",
         "date_from": "2026-03-15",
         "date_to": "2026-04-13",
         "prev_date_from": "2026-02-13",
@@ -1575,236 +1616,204 @@ window.__DASHBOARD_DATA__ = {
   }
 };
 
-// ── Утилиты ──
 const D = window.__DASHBOARD_DATA__;
-let currentChart1 = null, currentChart2 = null;
+let charts = {};
+let modalChart = null;
 
-function fmt(n, decimals = 0) {
-  if (n == null || isNaN(n)) return '—';
-  return Number(n).toLocaleString('ru-RU', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-}
+// ── Utils ──
+const fmt = (n, d=0) => n == null || isNaN(+n) ? '—' :
+  (+n).toLocaleString('ru-RU', {minimumFractionDigits:d, maximumFractionDigits:d});
+const fmtRub = n => n == null || isNaN(+n) ? '—' : fmt(n,0) + ' ₽';
+const fmtPct = n => n == null || isNaN(+n) ? '—' : (+n).toFixed(1) + '%';
 
-function fmtRub(n) {
-  if (n == null || isNaN(n)) return '—';
-  return fmt(n, 0) + ' ₽';
-}
-
-function fmtPct(n) {
-  if (n == null || isNaN(n)) return '—';
-  return Number(n).toFixed(1) + '%';
-}
-
-function changeClass(n) {
-  if (!n || n === 0) return 'change-neu';
-  return n > 0 ? 'change-pos' : 'change-neg';
-}
-
-function changeArrow(n) {
-  if (!n || n === 0) return '';
-  return n > 0 ? '↑' : '↓';
-}
-
-function changeHtml(n, suffix = '%') {
-  if (!n && n !== 0) return '<span class="change-neu">—</span>';
-  const cls = changeClass(n);
-  const arrow = changeArrow(n);
+function chgHtml(n, suffix='%', invert=false) {
+  if (n == null || isNaN(+n) || n === 0) return '<span class="neu">—</span>';
+  const pos = invert ? n < 0 : n > 0;
+  const cls = pos ? 'pos' : 'neg';
+  const arrow = n > 0 ? '↑' : '↓';
   return `<span class="${cls}">${arrow}${Math.abs(n).toFixed(1)}${suffix}</span>`;
 }
 
-// ── Инициализация селектора аккаунтов ──
-function initAccountSelector() {
+// ── Chart defaults ──
+Chart.defaults.color = '#7c82a3';
+Chart.defaults.borderColor = '#2a2f4a';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif";
+Chart.defaults.font.size = 11;
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => c && c.destroy());
+  charts = {};
+}
+
+// ── Account selector ──
+function initSelector() {
   const sel = document.getElementById('accountSelect');
   sel.innerHTML = '';
-  const meta = D.meta;
-  if (!meta || !meta.account_ids || meta.account_ids.length === 0) {
-    sel.innerHTML = '<option value="">Нет аккаунтов</option>';
-    return;
-  }
-  meta.account_ids.forEach(id => {
-    const acc = D.accounts[id];
-    const name = acc?.meta?.project_name || id;
-    const opt = document.createElement('option');
-    opt.value = id;
-    opt.textContent = name;
-    sel.appendChild(opt);
+  (D.meta.account_ids || []).forEach(id => {
+    const name = D.accounts[id]?.meta?.project_name || id;
+    sel.appendChild(Object.assign(document.createElement('option'), {value: id, textContent: name}));
   });
-  sel.value = meta.default_account_id || meta.account_ids[0];
+  sel.value = D.meta.default_account_id || D.meta.account_ids?.[0];
 }
 
-// ── Переключение аккаунта ──
-function switchAccount(accountId) {
-  if (!accountId) return;
-  renderDashboard(accountId);
-}
+function switchAccount(id) { renderDashboard(id); }
 
-// ── Рендер дашборда ──
+// ── Main render ──
 function renderDashboard(accountId) {
+  destroyCharts();
   const acc = D.accounts[accountId];
-  if (!acc) {
-    document.getElementById('mainContent').innerHTML = '<div class="no-data">Данные не найдены</div>';
-    return;
-  }
-
-  if (acc.error) {
+  if (!acc || acc.error) {
     document.getElementById('mainContent').innerHTML =
-      `<div class="no-data">Ошибка загрузки данных: ${acc.error}</div>`;
+      `<div class="no-data">${acc?.error || 'Нет данных'}</div>`;
     return;
   }
 
-  const meta = acc.meta || {};
-  const direct = acc.direct || {};
-  const metrica = acc.metrica || {};
-  const ct = direct.current?.totals || {};
-  const pt = direct.prev?.totals || {};
-  const mt = metrica.current?.totals || {};
-  const mpt = metrica.prev?.totals || {};
-  const change = direct.change || {};
-  const campaigns = direct.campaign_summaries || {};
+  const meta  = acc.meta || {};
+  const dir   = acc.direct || {};
+  const met   = acc.metrica || {};
+  const ct    = dir.current?.totals || {};
+  const pt    = dir.prev?.totals || {};
+  const mt    = met.current?.totals || {};
+  const mpt   = met.prev?.totals || {};
+  const chg   = dir.change || {};
+  const camps = dir.campaign_summaries || {};
+  const daily = met.current?.daily || [];
 
-  // Header meta
   document.getElementById('headerPeriod').textContent =
-    `${meta.date_from} — ${meta.date_to}`;
+    meta.date_from && meta.date_to ? `${meta.date_from} — ${meta.date_to}` : '';
   document.getElementById('headerMeta').textContent =
-    `Обновлено: ${meta.generated_at ? new Date(meta.generated_at).toLocaleString('ru-RU') : '—'}`;
-
-  // Footer
+    meta.generated_at ? 'Обновлено: ' + new Date(meta.generated_at).toLocaleString('ru-RU') : '';
   document.getElementById('footer').textContent =
-    `HHB Dashboard • hotheads-marketing • Данные: Яндекс Директ + Метрика • Сгенерировано ${meta.generated_at ? new Date(meta.generated_at).toLocaleString('ru-RU') : ''}`;
+    `HHB Dashboard · hotheads-marketing · Яндекс Директ + Метрика · ${meta.generated_at ? new Date(meta.generated_at).toLocaleString('ru-RU') : ''}`;
 
-  // ── KPI карточки ──
-  const ctr = ct.ctr || 0;
-  const ptctr = pt.ctr || 0;
-  const kpiCards = [
-    { label: 'Показы', value: fmt(ct.impressions), change: change.impressions_pct, suffix: '%' },
-    { label: 'Клики', value: fmt(ct.clicks), change: change.clicks_pct, suffix: '%' },
-    { label: 'CTR', value: fmtPct(ct.ctr), change: change.ctr_pp, suffix: 'pp', raw: true },
-    { label: 'Расход', value: fmtRub(ct.cost_rub), change: change.cost_pct, suffix: '%' },
-    { label: 'CPC', value: fmtRub(ct.cpc), change: change.cpc_pct, suffix: '%', invertColor: true },
-    { label: 'Визиты', value: fmt(mt.visits), change: mt.visits && mpt.visits ? ((mt.visits - mpt.visits) / (mpt.visits || 1) * 100) : null, suffix: '%' },
-    { label: 'Вовлечённые', value: fmt(mt.engaged), change: null },
-    { label: 'Лиды', value: fmt(mt.leads) || '—', change: null },
+  // ── KPI ──
+  const visChange = mt.visits && mpt.visits
+    ? Math.round((mt.visits - mpt.visits) / mpt.visits * 100) : null;
+  const kpis = [
+    {label:'Показы',          value: fmt(ct.impressions),  chg: chg.impressions_pct, suf:'%'},
+    {label:'Клики',           value: fmt(ct.clicks),       chg: chg.clicks_pct,      suf:'%'},
+    {label:'CTR',             value: fmtPct(ct.ctr),       chg: chg.ctr_pp,          suf:'pp'},
+    {label:'Расход',          value: fmtRub(ct.cost_rub),  chg: chg.cost_pct,        suf:'%'},
+    {label:'CPC',             value: fmtRub(ct.cpc),       chg: chg.cpc_pct,         suf:'%', inv:true},
+    {label:'Визиты (Метрика)',value: fmt(mt.visits),        chg: visChange,           suf:'%'},
+    {label:'Вовлечённые',     value: fmt(mt.engaged),      chg: null},
+    {label:'Лиды',            value: fmt(mt.leads) || '—', chg: null},
   ];
 
-  let kpiHtml = '<div class="kpi-grid">';
-  kpiCards.forEach(k => {
-    let chgHtml = '';
-    if (k.change != null) {
-      const val = k.raw ? k.change : k.change;
-      const cls = k.invertColor
-        ? (val > 0 ? 'neg' : val < 0 ? 'pos' : 'neu')
-        : (val > 0 ? 'pos' : val < 0 ? 'neg' : 'neu');
-      const arrow = val > 0 ? '↑' : val < 0 ? '↓' : '';
-      chgHtml = `<div class="kpi-change ${cls}">${arrow} ${Math.abs(val).toFixed(1)}${k.suffix} к пред. периоду</div>`;
-    }
-    kpiHtml += `
-      <div class="kpi-card">
-        <div class="kpi-label">${k.label}</div>
-        <div class="kpi-value">${k.value}</div>
-        ${chgHtml}
-      </div>`;
-  });
-  kpiHtml += '</div>';
-
-  // ── Воронка ──
-  const directVisits = mt.visits || ct.clicks || 0;
-  const engaged = mt.engaged || 0;
-  const leads = mt.leads || 0;
-  const maxFunnel = Math.max(ct.impressions || 0, 1);
-  const maxFunnel2 = Math.max(ct.impressions || 0, 1);
-
-  function funnelBar(val, max, color) {
-    const w = Math.min(100, Math.round(val / max * 100));
-    return `<div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${w}%;background:${color}">${w}%</div></div>`;
-  }
-
-  const funnelHtml = `
-    <div class="funnel-row">
-      <div class="funnel-card">
-        <div class="funnel-card-title">Воронка — Весь сайт</div>
-        <div class="funnel-step">
-          <div class="funnel-label">Визиты</div>
-          ${funnelBar(mt.visits || 0, Math.max(mt.visits||0,1), '#5c6ef8')}
-          <div class="funnel-value">${fmt(mt.visits)}</div>
-        </div>
-        <div class="funnel-step">
-          <div class="funnel-label">Вовлечённые</div>
-          ${funnelBar(engaged, Math.max(mt.visits||0,1), '#7c8af8')}
-          <div class="funnel-value">${fmt(engaged)}</div>
-        </div>
-        <div class="funnel-step">
-          <div class="funnel-label">Лиды</div>
-          ${funnelBar(leads, Math.max(mt.visits||0,1), '#34d399')}
-          <div class="funnel-value">${fmt(leads) || '—'}</div>
-        </div>
-      </div>
-      <div class="funnel-card">
-        <div class="funnel-card-title">Воронка — Яндекс Директ</div>
-        <div class="funnel-step">
-          <div class="funnel-label">Показы</div>
-          ${funnelBar(ct.impressions||0, Math.max(ct.impressions||0,1), '#5c6ef8')}
-          <div class="funnel-value">${fmt(ct.impressions)}</div>
-        </div>
-        <div class="funnel-step">
-          <div class="funnel-label">Клики</div>
-          ${funnelBar(ct.clicks||0, Math.max(ct.impressions||0,1), '#7c8af8')}
-          <div class="funnel-value">${fmt(ct.clicks)}</div>
-        </div>
-        <div class="funnel-step">
-          <div class="funnel-label">Визиты</div>
-          ${funnelBar(directVisits, Math.max(ct.impressions||0,1), '#a5b4fc')}
-          <div class="funnel-value">${fmt(directVisits)}</div>
-        </div>
-        <div class="funnel-step">
-          <div class="funnel-label">Лиды</div>
-          ${funnelBar(leads, Math.max(ct.impressions||0,1), '#34d399')}
-          <div class="funnel-value">${fmt(leads) || '—'}</div>
-        </div>
-      </div>
+  const kpiHtml = `
+    <div class="section-label">Ключевые показатели</div>
+    <div class="kpi-grid">
+      ${kpis.map(k => `
+        <div class="kpi-card">
+          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-value">${k.value}</div>
+          <div class="kpi-change">${k.chg != null ? chgHtml(k.chg, k.suf, k.inv) : ''}</div>
+          <div class="kpi-vs">${k.chg != null ? 'vs предыдущий период' : ''}</div>
+        </div>`).join('')}
     </div>`;
 
-  // ── Графики ──
-  const daily = metrica.current?.daily || [];
+  // ── Charts ──
+  const dateLabels = daily.map(d => d.date?.slice(5) || d.date);
+  const visitData  = daily.map(d => d.visits || 0);
+  const engData    = daily.map(d => d.engaged || 0);
+
   const chartsHtml = `
+    <div class="section-label" style="margin-top:4px">Динамика</div>
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-card-title">Визиты по дням</div>
+        <div class="chart-title">Визиты и вовлечённые по дням</div>
         <div class="chart-wrap"><canvas id="visitsChart"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-title">Клики и расход по дням</div>
-        <div class="chart-wrap"><canvas id="clicksChart"></canvas></div>
+        <div class="chart-title">Расход по дням (Директ)</div>
+        <div class="chart-wrap"><canvas id="costChart"></canvas></div>
       </div>
     </div>`;
 
-  // ── Таблица кампаний ──
-  const campList = Object.entries(campaigns);
+  // ── Funnel ──
+  const maxSite = Math.max(mt.visits || 0, 1);
+  const maxDir  = Math.max(ct.impressions || 0, 1);
+  const convRate = (a, b) => b > 0 ? (a/b*100).toFixed(1) + '%' : '—';
+
+  function bar(val, max, color) {
+    const w = Math.min(100, Math.round(val / max * 100));
+    return `<div class="funnel-track">
+      <div class="funnel-bar" style="width:${w}%;background:${color}">${w > 15 ? w+'%' : ''}</div>
+    </div>`;
+  }
+
+  const funnelHtml = `
+    <div class="section-label">Воронка</div>
+    <div class="funnel-row">
+      <div class="funnel-card">
+        <div class="funnel-title">Весь сайт (Метрика)</div>
+        ${[
+          {name:'Визиты',      val: mt.visits||0,  max: maxSite, color:'#6366f1', conv: '100%'},
+          {name:'Вовлечённые', val: mt.engaged||0, max: maxSite, color:'#818cf8', conv: convRate(mt.engaged,mt.visits)},
+          {name:'Лиды',        val: mt.leads||0,   max: maxSite, color:'#10b981', conv: convRate(mt.leads,mt.visits)},
+        ].map(s => `
+          <div class="funnel-step">
+            <div class="funnel-name">${s.name}</div>
+            ${bar(s.val, s.max, s.color)}
+            <div class="funnel-val">${fmt(s.val)}<div class="funnel-conv">${s.conv}</div></div>
+          </div>`).join('')}
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-title">Яндекс Директ</div>
+        ${[
+          {name:'Показы',  val: ct.impressions||0, max: maxDir, color:'#6366f1', conv:'100%'},
+          {name:'Клики',   val: ct.clicks||0,      max: maxDir, color:'#818cf8', conv: convRate(ct.clicks,ct.impressions)},
+          {name:'Визиты',  val: mt.visits||0,       max: maxDir, color:'#a5b4fc', conv: convRate(mt.visits,ct.clicks)},
+          {name:'Лиды',    val: mt.leads||0,         max: maxDir, color:'#10b981', conv: convRate(mt.leads,ct.clicks)},
+        ].map(s => `
+          <div class="funnel-step">
+            <div class="funnel-name">${s.name}</div>
+            ${bar(s.val, s.max, s.color)}
+            <div class="funnel-val">${fmt(s.val)}<div class="funnel-conv">${s.conv}</div></div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  // ── Campaigns table ──
+  const campList = Object.entries(camps);
   let tableHtml = '';
   if (campList.length === 0) {
     tableHtml = '<div class="no-data">Нет данных по кампаниям</div>';
   } else {
     const rows = campList.map(([id, c]) => {
       const cur = c.current || {};
-      const chg = c.change || {};
+      const chgC = c.change || {};
+      const leads = cur.leads || 0;
+      const cpl = leads > 0 ? fmtRub((cur.cost_rub||0) / leads) : '—';
+      const trend = chgC.clicks_pct > 5 ? '↑' : chgC.clicks_pct < -5 ? '↓' : '→';
+      const trendCls = chgC.clicks_pct > 5 ? 'pos' : chgC.clicks_pct < -5 ? 'neg' : 'neu';
       const typeTag = c.type === 'search'
         ? '<span class="tag tag-search">Поиск</span>'
         : '<span class="tag tag-rsya">РСЯ</span>';
       return `
-        <tr>
+        <tr onclick="openModal('${id}', ${JSON.stringify(JSON.stringify(c)).slice(1,-1)})">
           <td class="td-name">
             <div>${c.shortName || c.name}</div>
-            <div class="td-name-sub">${typeTag} ID: ${id}</div>
+            <div class="td-sub">${typeTag} <span>ID ${id}</span></div>
           </td>
           <td class="num">${fmt(cur.impressions)}</td>
-          <td class="num">${fmt(cur.clicks)}<br>${changeHtml(chg.clicks_pct)}</td>
-          <td class="num">${fmtPct(cur.ctr)}<br>${changeHtml(chg.ctr_pp, 'pp')}</td>
-          <td class="num">${fmtRub(cur.cost_rub)}<br>${changeHtml(chg.cost_pct)}</td>
+          <td class="num">${fmt(cur.clicks)}<div class="chg">${chgHtml(chgC.clicks_pct)}</div></td>
+          <td class="num">${fmtPct(cur.ctr)}<div class="chg">${chgHtml(chgC.ctr_pp,'pp')}</div></td>
+          <td class="num">${fmtRub(cur.cost_rub)}<div class="chg">${chgHtml(chgC.cost_pct)}</div></td>
           <td class="num">${fmtRub(cur.cpc)}</td>
+          <td class="num">${fmt(leads) || '—'}</td>
+          <td class="num">${cpl}</td>
+          <td class="trend ${trendCls}">${trend}</td>
         </tr>`;
     }).join('');
 
     tableHtml = `
+      <div class="section-label">Активные кампании</div>
       <div class="table-card">
-        <div class="table-header">Кампании</div>
+        <div class="table-header-row">
+          <div class="table-title">Кампании (${campList.length})</div>
+          <div class="table-hint">Нажми на строку — откроется детали</div>
+        </div>
         <table>
           <thead>
             <tr>
@@ -1814,6 +1823,9 @@ function renderDashboard(accountId) {
               <th>CTR</th>
               <th>Расход</th>
               <th>CPC</th>
+              <th>Лиды</th>
+              <th>CPL</th>
+              <th>Тренд</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1821,84 +1833,160 @@ function renderDashboard(accountId) {
       </div>`;
   }
 
-  // ── Собираем страницу ──
   document.getElementById('mainContent').innerHTML =
-    kpiHtml + funnelHtml + chartsHtml + tableHtml;
+    kpiHtml + chartsHtml + funnelHtml + tableHtml;
 
-  // ── Инициализируем графики ──
-  if (currentChart1) currentChart1.destroy();
-  if (currentChart2) currentChart2.destroy();
+  // ── Init charts ──
+  requestAnimationFrame(() => {
+    // Визиты
+    const ctx1 = document.getElementById('visitsChart');
+    if (ctx1 && dateLabels.length > 0) {
+      charts.visits = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: dateLabels,
+          datasets: [
+            {
+              label: 'Визиты',
+              data: visitData,
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99,102,241,0.12)',
+              fill: true, tension: 0.4, pointRadius: 2, pointHoverRadius: 5,
+              borderWidth: 2,
+            },
+            {
+              label: 'Вовлечённые',
+              data: engData,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.08)',
+              fill: true, tension: 0.4, pointRadius: 2, pointHoverRadius: 5,
+              borderWidth: 2,
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'top',
+              labels: { boxWidth: 10, padding: 16, font: { size: 11 } } },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { grid: { color: '#1e2235' }, ticks: { maxTicksLimit: 10 } },
+            y: { grid: { color: '#1e2235' }, beginAtZero: true }
+          }
+        }
+      });
+    }
 
-  const labels = daily.map(d => d.date?.slice(5) || d.date);
-  const visitData = daily.map(d => d.visits || 0);
+    // Расход — если нет daily данных директа, строим заглушку
+    const ctx2 = document.getElementById('costChart');
+    if (ctx2) {
+      const dirDaily = dir.current?.daily || [];
+      const costLabels = dirDaily.length > 0
+        ? dirDaily.map(d => d.date?.slice(5))
+        : dateLabels;
+      const costData = dirDaily.length > 0
+        ? dirDaily.map(d => d.cost_rub || d.cost || 0)
+        : dateLabels.map(() => Math.round((ct.cost_rub || 0) / Math.max(dateLabels.length, 1)));
 
-  // График визитов
-  const ctx1 = document.getElementById('visitsChart');
-  if (ctx1 && labels.length > 0) {
-    currentChart1 = new Chart(ctx1, {
+      charts.cost = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: costLabels,
+          datasets: [{
+            label: 'Расход ₽',
+            data: costData,
+            backgroundColor: 'rgba(99,102,241,0.5)',
+            borderColor: '#6366f1',
+            borderWidth: 1,
+            borderRadius: 5,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+          scales: {
+            x: { grid: { color: '#1e2235' }, ticks: { maxTicksLimit: 10 } },
+            y: { grid: { color: '#1e2235' }, beginAtZero: true }
+          }
+        }
+      });
+    }
+  });
+}
+
+// ── Modal ──
+function openModal(campId, campJson) {
+  const c = JSON.parse(campJson);
+  const cur = c.current || {};
+  const chgC = c.change || {};
+  const leads = cur.leads || 0;
+  const cpl = leads > 0 ? fmtRub(cur.cost_rub / leads) : '—';
+
+  document.getElementById('modalTitle').textContent = c.name || campId;
+  document.getElementById('modalSub').innerHTML =
+    `${c.type === 'search' ? '<span class="tag tag-search">Поиск</span>' : '<span class="tag tag-rsya">РСЯ</span>'} &nbsp; ID: ${campId}`;
+
+  document.getElementById('modalKpi').innerHTML = [
+    {label:'Показы',  val: fmt(cur.impressions)},
+    {label:'Клики',   val: fmt(cur.clicks)},
+    {label:'CTR',     val: fmtPct(cur.ctr)},
+    {label:'Расход',  val: fmtRub(cur.cost_rub)},
+    {label:'CPC',     val: fmtRub(cur.cpc)},
+    {label:'Лиды',    val: fmt(leads) || '—'},
+  ].map(k => `
+    <div class="modal-kpi-item">
+      <div class="modal-kpi-label">${k.label}</div>
+      <div class="modal-kpi-val">${k.val}</div>
+    </div>`).join('');
+
+  // Modal chart
+  if (modalChart) modalChart.destroy();
+  const daily = c.daily || [];
+  const mctx = document.getElementById('modalChart');
+  if (mctx && daily.length > 0) {
+    modalChart = new Chart(mctx, {
       type: 'line',
       data: {
-        labels,
-        datasets: [{
-          label: 'Визиты',
-          data: visitData,
-          borderColor: '#5c6ef8',
-          backgroundColor: 'rgba(92,110,248,0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 2,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
-          y: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
-        }
-      }
-    });
-  }
-
-  // График кликов — используем direct daily если есть, иначе flat line
-  const directDaily = direct.current?.daily || [];
-  const clickLabels = directDaily.length > 0
-    ? directDaily.map(d => d.date?.slice(5))
-    : labels;
-  const clickData = directDaily.length > 0
-    ? directDaily.map(d => d.clicks || 0)
-    : new Array(labels.length).fill(Math.round((ct.clicks || 0) / Math.max(labels.length, 1)));
-
-  const ctx2 = document.getElementById('clicksChart');
-  if (ctx2) {
-    currentChart2 = new Chart(ctx2, {
-      type: 'bar',
-      data: {
-        labels: clickLabels,
+        labels: daily.map(d => d.date?.slice(5)),
         datasets: [{
           label: 'Клики',
-          data: clickData,
-          backgroundColor: 'rgba(92,110,248,0.6)',
-          borderRadius: 4,
+          data: daily.map(d => d.clicks || 0),
+          borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)',
+          fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
-          y: { ticks: { color: '#8b90a7', font: { size: 10 } }, grid: { color: '#2e3248' } },
+          x: { grid: { color: '#1e2235' } },
+          y: { grid: { color: '#1e2235' }, beginAtZero: true }
         }
       }
     });
+  } else if (mctx) {
+    mctx.parentElement.innerHTML =
+      '<div style="color:var(--text3);text-align:center;padding:40px;font-size:12px">Нет детальных данных по дням</div>';
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay') || e.currentTarget === document.querySelector('.modal-close')) {
+    document.getElementById('modalOverlay').classList.remove('open');
   }
 }
 
-// ── Запуск ──
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
-  initAccountSelector();
-  const defaultId = D.meta?.default_account_id || D.meta?.account_ids?.[0];
-  if (defaultId) renderDashboard(defaultId);
+  initSelector();
+  const id = D.meta?.default_account_id || D.meta?.account_ids?.[0];
+  if (id) renderDashboard(id);
   else document.getElementById('mainContent').innerHTML = '<div class="no-data">Нет данных</div>';
 });
 </script>
