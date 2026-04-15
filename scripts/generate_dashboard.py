@@ -221,6 +221,19 @@ def get_metrica_daily(token: str, counter_id: str, date_from: str, date_to: str)
     return {"daily": daily, "totals": totals}
 
 
+def get_metrica_goal_names(token: str, counter_id: str) -> dict:
+    """Получает названия всех целей счётчика."""
+    url = f"https://api-metrika.yandex.net/management/v1/counter/{counter_id}/goals"
+    req = urllib.request.Request(url, headers={"Authorization": f"OAuth {token}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return {str(g["id"]): g["name"] for g in data.get("goals", [])}
+    except Exception as e:
+        print(f"  [Metrica Goals Names ERROR] {e}", file=sys.stderr)
+        return {}
+
+
 def get_metrica_goals(token: str, counter_id: str, date_from: str, date_to: str,
                       goal_ids: list) -> dict:
     if not goal_ids:
@@ -237,6 +250,73 @@ def get_metrica_goals(token: str, counter_id: str, date_from: str, date_to: str,
         total  += reaches
         goals.append({"goal_id": gid, "reaches": reaches})
     return {"available": True, "total_leads": total, "data": goals}
+
+
+def get_goals_daily(token: str, counter_id: str, date_from: str, date_to: str,
+                    goal_ids: list, goal_names: dict) -> list:
+    """
+    Получает динамику достижений каждой цели по дням.
+    Для каждой цели — два источника: all (все) и direct (Яндекс.Директ).
+    Возвращает список целей с daily-массивами.
+    """
+    if not goal_ids:
+        return []
+
+    result = []
+    for gid in goal_ids:
+        gid = str(gid)
+        name = goal_names.get(gid, f"Цель {gid}")
+
+        # Все источники — по дням
+        resp_all = metrica_req(token, counter_id, {
+            "metrics":    f"ym:s:goal{gid}reaches",
+            "dimensions": "ym:s:date",
+            "date1": date_from, "date2": date_to,
+            "sort": "ym:s:date", "limit": 100,
+        })
+
+        daily_all = []
+        total_all = 0
+        for row in resp_all.get("data", []):
+            dims    = row.get("dimensions", [{}])
+            metrics = row.get("metrics", [0])
+            date    = dims[0].get("name", "") if dims else ""
+            val     = int(metrics[0]) if metrics else 0
+            daily_all.append({"date": date, "reaches": val})
+            total_all += val
+
+        # Яндекс.Директ — фильтр по источнику
+        resp_dir = metrica_req(token, counter_id, {
+            "metrics":    f"ym:s:goal{gid}reaches",
+            "dimensions": "ym:s:date",
+            "filters":    "ym:s:lastSignTrafficSource=='ad'",
+            "date1": date_from, "date2": date_to,
+            "sort": "ym:s:date", "limit": 100,
+        })
+
+        daily_direct = {}
+        total_direct = 0
+        for row in resp_dir.get("data", []):
+            dims    = row.get("dimensions", [{}])
+            metrics = row.get("metrics", [0])
+            date    = dims[0].get("name", "") if dims else ""
+            val     = int(metrics[0]) if metrics else 0
+            daily_direct[date] = val
+            total_direct += val
+
+        # Объединяем — добавляем direct в daily_all
+        for d in daily_all:
+            d["reaches_direct"] = daily_direct.get(d["date"], 0)
+
+        result.append({
+            "goal_id":      gid,
+            "name":         name,
+            "total_all":    total_all,
+            "total_direct": total_direct,
+            "daily":        daily_all,
+        })
+
+    return result
 
 
 # ─── Сборка аккаунта ─────────────────────────────────────────────────────────
@@ -285,6 +365,7 @@ def build_account(token: str, account: dict,
     met_prev = {"daily":[], "totals":{"visits":0,"users":0,"engaged":0,"leads":0}}
     goals    = {"available": False, "total_leads": 0}
 
+    goals_daily = []
     if counter_id:
         print(f"    Метрика счётчик {counter_id}")
         met_cur  = get_metrica_daily(token, counter_id, date_from, date_to)
@@ -297,6 +378,15 @@ def build_account(token: str, account: dict,
             if n > 0:
                 for row in met_cur["daily"]:
                     row["leads"] = leads // n
+
+            # Получаем названия целей и динамику по дням
+            print(f"    Метрика: цели по дням ({len(goal_ids)} целей)")
+            goal_names = get_metrica_goal_names(token, counter_id)
+            goals_daily = get_goals_daily(
+                token, counter_id, date_from, date_to, goal_ids, goal_names)
+            # Добавляем названия в goals.data
+            for g in goals.get("data", []):
+                g["name"] = goal_names.get(str(g["goal_id"]), f"Цель {g['goal_id']}")
 
     return {
         "meta": {
@@ -318,9 +408,10 @@ def build_account(token: str, account: dict,
             "campaign_summaries": cur_direct["campaign_summaries"],
         },
         "metrica": {
-            "current": met_cur,
-            "prev":    met_prev,
-            "goals":   goals,
+            "current":    met_cur,
+            "prev":       met_prev,
+            "goals":      goals,
+            "goals_daily": goals_daily,
         },
     }
 
